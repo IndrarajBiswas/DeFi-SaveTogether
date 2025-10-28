@@ -1,37 +1,46 @@
-# Linea Microfinance Documentation
+# Linea Microfinance Documentation Hub
 
-Welcome to the official documentation for the Linea Microfinance project. This documentation provides a comprehensive overview of the project, its architecture, and how to build, deploy, and interact with it.
+Welcome! This hub is the canonical entry point for engineers, operators, and stakeholders working on the Linea Microfinance MVP. It provides deep dives, playbooks, and context that build on the high-level overview in the repository [README](../../README.md).
 
-## Project Vision
+## How to Use This Hub
 
-This project aims to build a decentralized and transparent microfinance platform on the Linea network, inspired by the Grameen Bank's model of joint-liability group lending. By leveraging blockchain technology, we can reduce administrative overhead, increase transparency, and provide access to financial services for underserved communities.
+1. **Start with the system overview** to understand the moving pieces and how they interact.
+2. **Follow the getting started track** to install dependencies and run each stack locally.
+3. **Reference the operational guides** when deploying, updating parameters, or responding to incidents.
+4. **Share the executive brief** when onboarding new stakeholders or pitching the pilot.
 
-## Core Concepts
+## System Overview
 
-*   **Joint-Liability Groups**: Users form small groups (3-12 members) and pool their resources. The group as a whole is responsible for the loans of its members.
-*   **Savings First**: Before they can borrow, users must demonstrate a consistent savings history, building financial discipline and a capital base.
-*   **Attestation & KYC**: To ensure compliance and prevent fraud, users must be attested by a whitelisted issuer. This provides a basic level of Know Your Customer (KYC).
-*   **Group-Approved Loans**: Loan applications are approved by the user's group, creating social collateral and encouraging responsible borrowing.
-*   **Stake & Slashing**: Groups lock a portion of their savings as a stake. In case of a default, a portion of this stake is "slashed" (forfeited), creating a strong incentive for the group to ensure all members repay their loans.
+Linea Microfinance combines on-chain contracts, an indexing layer, and a Next.js web application to deliver Grameen-style joint-liability lending on Linea Sepolia/Mainnet. A high-level diagram is available in [`docs/architecture.md`](../architecture.md), which covers:
 
-## System Architecture
+- Contract responsibilities and key safeguards.
+- Data flow between the SavingsPool, GroupVault, and CreditLine contracts.
+- How the subgraph and frontend consume emitted events.
+- Operational touchpoints for governance and deployments.
 
-The Linea Microfinance platform is a monorepo containing several key components:
+## Document Map
 
-*   **Smart Contracts**: The core logic of the platform, written in Solidity and built with Foundry.
-*   **Subgraph**: An indexing layer from The Graph that provides a fast and efficient way to query on-chain data.
-*   **Frontend**: A Next.js web application that provides a user-friendly interface for interacting with the platform.
-*   **Deployment Scripts**: Foundry scripts for deploying and configuring the smart contracts.
+| Guide | Audience | Summary |
+| --- | --- | --- |
+| [01_getting_started.md](./01_getting_started.md) | Developers | Step-by-step environment setup, contract compilation, testing, and frontend launch instructions. |
+| [02_smart_contracts.md](./02_smart_contracts.md) | Protocol engineers | Detailed walkthrough of the Solidity contracts, role management, and guard rails. |
+| [03_frontend_app.md](./03_frontend_app.md) | Frontend engineers | Explanation of the Next.js structure, wagmi/viem hooks, and page-level responsibilities. |
+| [04_subgraph.md](./04_subgraph.md) | Data & analytics | Subgraph schema, handlers, and deployment workflow. |
+| [05_deployment_runbook.md](./05_deployment_runbook.md) | DevOps / protocol ops | Deploy, verify, and promote contracts across environments with smoke-test checklists. |
+| [06_governance_and_security.md](./06_governance_and_security.md) | Governance, risk | Governance processes, emergency controls, parameter adjustments, and security posture. |
 
-![System Architecture Diagram](https://i.imgur.com/your-architecture-diagram.png) 
-**(Note: This is a placeholder for a diagram that should be created)**
+Additional resources:
 
-## Documentation Index
+- [`../params.md`](../params.md) – Default parameter catalog for governance reviews.
+- [`../runbook.md`](../runbook.md) – Tactical operations playbook for day-to-day management.
+- [`../threat-model.md`](../threat-model.md) – Threat modeling and mitigation checklist.
+- [`../../presentation.md`](../../presentation.md) – Executive briefing for partners and field teams.
 
-1.  **[Getting Started](./01_getting_started.md)**: A guide for developers on how to set up the project, run tests, and deploy the application.
-2.  **[Smart Contracts](./02_smart_contracts.md)**: A detailed look at the on-chain components of the platform.
-3.  **[Frontend Application](./03_frontend_app.md)**: An overview of the web application and its features.
-4.  **[Subgraph (Data Indexing)](./04_subgraph.md)**: Information on the data indexing and query layer.
-5.  **[Deployment Runbook](./05_deployment_runbook.md)**: A guide for deploying and managing the application.
-6.  **[Governance and Security](./06_governance_and_security.md)**: An explanation of the governance model and security considerations.
+## Maintainers & Contact
 
+- **Product / Strategy:** Coordinate roadmap changes, pilot criteria, and stakeholder updates.
+- **Protocol Engineering:** Own smart contract development, audits, and parameter recommendations.
+- **Frontend & Subgraph:** Manage the user experience, data visualizations, and API integrations.
+- **Operations:** Execute deployments, monitor health, and handle emergency procedures.
+
+Need help or have suggestions? Open an issue in GitHub or tag the relevant maintainer in the #linea-microfinance channel.

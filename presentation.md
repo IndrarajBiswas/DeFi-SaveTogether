@@ -34,6 +34,7 @@ This brief packages everything a non‑technical or technical audience needs to 
 - Subgraph (The Graph): Indexes Group/Loan/Savings events; provides read models for the app.
 - App (Next.js + viem/wagmi): UX for onboarding, savings, group formation, approvals, loan desk, repayments, and admin.
 - CI/CD: GitHub Actions (lint/build/test), scripted deploys to Linea networks.
+- Reference: [`docs/architecture.md`](docs/architecture.md) contains component responsibilities and sequence diagrams.
 
 ---
 

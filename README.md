@@ -1,128 +1,219 @@
-# Linea Microfinance – Grameen-style Group Lending (MVP)
+# Linea Microfinance – Joint-Liability Lending MVP
 
-End-to-end mono-repo for a joint-liability microfinance network on Linea. The stack covers on-chain savings/credit primitives, a subgraph indexer, deployment scripts, docs, and a pilot-ready web app targeting Linea Sepolia → Linea Mainnet.
+A full-stack reference implementation of Grameen-style group lending on Linea. The repository bundles Solidity contracts, a The Graph subgraph, deployment scripts, thorough documentation, and a Next.js pilot web app so that product, protocol, and operations teams can work from a single source of truth.
 
-## Repository Layout
+> **Mission:** unlock transparent, savings-first credit for small groups through shared incentives, verifiable attestations, and low-cost on-chain rails.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [System Architecture](#system-architecture)
+- [Repository Structure](#repository-structure)
+- [Quick Start](#quick-start)
+- [Environment Variables](#environment-variables)
+- [Local Development Workflows](#local-development-workflows)
+  - [Smart Contracts](#smart-contracts)
+  - [Frontend (Next.js)](#frontend-nextjs)
+  - [Subgraph](#subgraph)
+- [Testing & Quality Gates](#testing--quality-gates)
+- [Deployment](#deployment)
+- [Documentation Index](#documentation-index)
+- [Community & Contributing](#community--contributing)
+
+## Overview
+
+Linea Microfinance follows a "savings before credit" philosophy inspired by Grameen Bank. Borrowers join small groups, prove consistent savings, and backstop each other through joint liability and slashable stake. Governance and emergency controls are designed for pilot rollouts on Linea Sepolia with a migration path to Linea Mainnet.
+
+Key goals:
+
+- **Transparent credit rails** – permissioned issuance with verifiable attestations instead of opaque off-chain ledgers.
+- **Savings discipline** – enforce weekly deposits and streak tracking before unlocking loans.
+- **Group accountability** – social collateral through stake locking, approval quorums, and slashable exposure.
+- **Operational readiness** – scripted deployments, subgraph analytics, and documentation for field teams.
+
+## System Architecture
+
+```mermaid
+flowchart LR
+  subgraph Off-chain
+    Issuers[Attestation<br/>Issuers]
+    Ops[Ops Runbook &<br/>Parameter Sheets]
+  end
+  subgraph Linea Network
+    AR[AttestationRegistry]
+    SP[SavingsPool]
+    GV[GroupVault]
+    CL[CreditLine]
+    TR[Treasury]
+    GOV[GovernanceLite]
+  end
+  subgraph Tooling
+    FG[Foundry Scripts]
+    SG[Subgraph]
+    FE[Next.js Web App]
+  end
+
+  Issuers -->|attest| AR
+  AR --> CL
+  SP --> CL
+  GV --> CL
+  CL --> TR
+  CL --> SG
+  SP --> SG
+  GV --> SG
+  FG -. deploy/config .-> AR
+  FG -. deploy/config .-> SP
+  FG -. deploy/config .-> GV
+  FG -. deploy/config .-> CL
+  FG -. deploy/config .-> GOV
+  SG --> FE
+  FE --> CL
+  FE --> GV
+  FE --> SP
+  Ops --> GOV
+  Ops --> FG
+```
+
+See [`docs/architecture.md`](docs/architecture.md) for deeper component notes and data flow descriptions.
+
+## Repository Structure
 
 ```
-contracts/              Solidity sources (Foundry)
-script/                 Deployment + configuration scripts
-test/                   Foundry unit/property tests
-subgraph/               The Graph schema & mappings
-app/                    Next.js app & SDK glue
-docs/                   Parameters, threat model, runbook
+contracts/    Solidity sources (Foundry)
+script/       Deployment & parameter seeding scripts
+app/          Next.js web app (wagmi + viem)
+subgraph/     The Graph schema & mappings
+docs/         Operational docs, parameters, threat model, knowledge base
+presentation.md  Executive brief for stakeholders
 ```
-
-## Prerequisites
-
-- Node.js ≥ 18 (Node 20 recommended for React Native peer dependencies)
-- npm or pnpm
-- [Foundry](https://book.getfoundry.sh/) (`foundryup`)
-- (Optional) Graph CLI for subgraph workflows
 
 ## Quick Start
 
 ```bash
-# Install Foundry toolchain
+# Install the Foundry toolchain
 curl -L https://foundry.paradigm.xyz | bash
 ~/.foundry/bin/foundryup
 
-# Clone dependencies
-cd linea-microfinance
-~/.foundry/bin/forge install OpenZeppelin/openzeppelin-contracts foundry-rs/forge-std --no-git
+# Clone and enter the repository
+git clone https://github.com/<your-org>/DeFi-SaveTogether.git
+cd DeFi-SaveTogether
 
-# Install web app deps
+# Install contract dependencies
+~/.foundry/bin/forge install \
+  OpenZeppelin/openzeppelin-contracts \
+  foundry-rs/forge-std \
+  --no-git
+
+# Install frontend dependencies
 cd app
 npm install
 ```
 
-### Environment Variables
+## Environment Variables
 
-Copy `.env.example` to `.env` and populate RPC URLs, deployer key, stablecoin addresses, and governance owner. These values are used by Foundry scripts, the frontend, and dev tooling.
+Create a `.env` file from the template and populate it with your network configuration:
 
-```
+```bash
 cp .env.example .env
 ```
 
-## Contracts & Tests
+| Variable | Used By | Description |
+| --- | --- | --- |
+| `LINEA_RPC_URL` | Contracts, app | HTTPS RPC endpoint for Linea Mainnet deployments. |
+| `LINEA_SEPOLIA_RPC_URL` | Contracts, app | HTTPS RPC endpoint for Linea Sepolia testnet. |
+| `PRIVATE_KEY_DEPLOYER` | Foundry scripts | Deployer private key (never commit this). |
+| `SUBGRAPH_HOST` | Subgraph | Graph node host for local development. |
+| `USDC_ADDRESS_SEPOLIA` / `USDC_ADDRESS_MAINNET` | Contracts, app | Stablecoin contract addresses used for deposits and loans. |
+| `OWNER_ADDRESS` | Scripts | Governance owner / multisig address. |
+| `ATTESTATION_REGISTRY` | App | Optional override when attaching to existing deployments. |
+| `NEXT_PUBLIC_NETWORK` | App | `sepolia` or `mainnet` for runtime configuration. |
+| `NEXT_PUBLIC_LINEA_SEPOLIA_RPC_URL` / `NEXT_PUBLIC_LINEA_RPC_URL` | App | Client-side RPCs for wagmi/viem. |
+| `NEXT_PUBLIC_SUBGRAPH_URL` | App | HTTP endpoint of the deployed subgraph. |
+
+## Local Development Workflows
+
+### Smart Contracts
 
 ```bash
-# From repo root
+# From the repository root
 ~/.foundry/bin/forge build
 ~/.foundry/bin/forge test -vvv
 ```
 
 Highlights:
-- `CreditLine` enforces attestations, savings streaks, exposure caps, and stake slashing.
-- `SavingsPool` maintains weekly savings streaks and balances.
-- `GroupVault` tracks membership, approvals, and slashable stake.
 
-Coverage targets and invariants should be extended as functionality matures.
+- `CreditLine.sol` enforces attestations, savings streaks, approval quorums, and exposure caps.
+- `GroupVault.sol` manages membership, stake locking, approvals, and default slashing hooks.
+- `SavingsPool.sol` tracks weekly deposits and streak eligibility.
+- `GovernanceLite.sol` centralizes rate, exposure, and emergency pause parameters.
 
-## Deployment Workflow
+Inspect `test/` for unit tests and invariants, and extend them as business logic evolves.
 
-1. Set `LINEA_SEPOLIA_RPC_URL`, `PRIVATE_KEY_DEPLOYER`, `USDC_ADDRESS_SEPOLIA`, etc.
-2. Deploy contracts and wire roles:
-
-   ```bash
-   forge script script/00_deploy_all.s.sol --rpc-url $LINEA_SEPOLIA_RPC_URL --broadcast
-   forge script script/01_seed_params.s.sol --rpc-url $LINEA_SEPOLIA_RPC_URL --broadcast
-   ```
-
-3. Record addresses in `script/addresses.json` and share with frontend/subgraph teams.
-4. Operational guidance (pause, rollout, rollback) lives in `docs/runbook.md`.
-
-## Subgraph
-
-- Schema: `subgraph/schema.graphql`
-- Mapping handlers: `subgraph/src/mapping.ts`
-
-Example pipeline:
-
-```bash
-graph codegen
-graph build
-graph deploy --product hosted-service <slug>
-```
-
-## Web App (Next.js + wagmi/viem)
-
-Located under `app/`, the frontend covers all pilot flows: onboarding, savings, group formation, loan origination/approvals, repayments, and admin actions.
+### Frontend (Next.js)
 
 ```bash
 cd app
-npm install          # once
-npm run dev          # http://localhost:3000
-npm run build        # production bundle
+npm run dev        # http://localhost:3000
+npm run lint       # Type checking + linting
+npm run build      # Production build
 ```
 
-Pages & responsibilities:
-- `/` – Overview, onboarding checklist, quick stats
-- `/savings` – Deposit/withdraw, streak tracker, USDC allowance helper
-- `/groups` – Create/join groups, lock stake, approval status
-- `/loans` – Eligibility checks, request + approval UX, repayment schedule
-- `/admin` – Attest users, adjust parameters, pause/unpause platform
+Pages cover onboarding, savings flows, group creation, loan approvals, repayments, and admin guardrails. The app uses wagmi/viem and the generated contract ABIs from Foundry artifacts.
 
-Each page highlights pre-checks (attestation level, savings streak, exposure) and links to the relevant smart-contract actions.
+### Subgraph
 
-## Documentation
+```bash
+cd subgraph
+npm install          # once
+npm run codegen
+npm run build
+npm run deploy -- --product hosted-service <slug>  # or your preferred graph node
+```
 
-- `docs/params.md` – governance parameter defaults
-- `docs/threat-model.md` – key risk considerations
-- `docs/runbook.md` – deploy/rollback cookbook
+Handlers map events emitted by the SavingsPool, GroupVault, and CreditLine contracts to entities used by the frontend and dashboards.
 
-## Status Checklist
+## Testing & Quality Gates
 
-- [x] Contracts compile with Foundry
-- [x] Baseline Foundry tests in place
-- [x] Deployment scripts scaffolded
-- [x] Subgraph schema & mappings generated
-- [x] Frontend pages scaffolded across flows
-- [x] Repository documentation updated
+- **Foundry** – unit/property tests under `test/` (`forge test`).
+- **Static analysis** – extend with `forge fmt`, `forge snapshot`, and `slither` as you harden the protocol.
+- **Frontend** – `npm run lint` ensures TypeScript and ESLint coverage.
+- **Subgraph** – `npm run test` (add matchstick tests) and CI builds as the schema evolves.
 
-### Post-MVP Enhancements
+Integrate these commands in CI/CD to block regressions before deployment.
 
-- Expand coverage & invariants (savings streak edge cases, repayment schedules)
-- Integrate live subgraph queries into the app
-- Harden default detection/rescheduling logic & fee accounting
-- Automate CI (lint, tests, app build, subgraph build, deployment)
+## Deployment
+
+1. Export the required environment variables (see `.env.example`).
+2. Deploy contracts to Linea Sepolia:
+   ```bash
+   forge script script/00_deploy_all.s.sol \
+     --rpc-url $LINEA_SEPOLIA_RPC_URL \
+     --broadcast
+
+   forge script script/01_seed_params.s.sol \
+     --rpc-url $LINEA_SEPOLIA_RPC_URL \
+     --broadcast
+   ```
+3. Record the emitted addresses in `script/addresses.json` and distribute them to the frontend + subgraph teams.
+4. Run the smoke tests and operational guidance in [`docs/runbook.md`](docs/runbook.md).
+5. Promote to Linea Mainnet after satisfying governance sign-off and mainnet funding requirements.
+
+## Documentation Index
+
+- [`docs/architecture.md`](docs/architecture.md) – High-level architecture and data flow diagrams.
+- [`docs/project-docs/`](docs/project-docs/index.md) – Deep-dive guides for getting started, contracts, subgraph, frontend, deployment, and governance.
+- [`docs/params.md`](docs/params.md) – Default parameter catalog.
+- [`docs/threat-model.md`](docs/threat-model.md) – Risk analysis and mitigations.
+- [`docs/runbook.md`](docs/runbook.md) – Step-by-step deployment and operational playbooks.
+- [`presentation.md`](presentation.md) – Executive summary for stakeholder briefings.
+
+## Community & Contributing
+
+Pull requests and issues are welcome! Please:
+
+1. Fork the repository and create a feature branch.
+2. Keep commits scoped and include tests or documentation updates.
+3. Run the relevant test suite(s) before opening a PR.
+4. Describe context and validation steps in the PR summary.
+
+For questions or collaboration, open an issue or reach out to the maintainers listed in [`docs/project-docs/index.md`](docs/project-docs/index.md).

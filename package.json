@@ -1,0 +1,12 @@
+{
+  "name": "linea-microfinance",
+  "private": true,
+  "workspaces": [
+    "app"
+  ],
+  "scripts": {
+    "postinstall": "echo 'Install foundry deps manually: forge install'",
+    "build": "echo 'Contracts build via forge; app via app/build'"
+  }
+}
+

@@ -1,0 +1,36 @@
+type Group @entity {
+  id: ID!
+  members: [Bytes!]!
+  minApprovals: Int!
+  stake: BigInt!
+  active: Boolean!
+  loans: [Loan!]! @derivedFrom(field: "group")
+}
+
+type Loan @entity {
+  id: ID!
+  borrower: Bytes!
+  principal: BigInt!
+  rateBps: Int!
+  termWeeks: Int!
+  start: Int!
+  repaid: BigInt!
+  defaulted: Boolean!
+  group: Group!
+  events: [LoanEvent!]! @derivedFrom(field: "loan")
+}
+
+type LoanEvent @entity {
+  id: ID!
+  loan: Loan!
+  kind: String!
+  amount: BigInt
+  at: Int!
+}
+
+type SavingsStat @entity {
+  id: ID!
+  consecutiveWeeks: Int!
+  lastWeek: Int!
+}
+

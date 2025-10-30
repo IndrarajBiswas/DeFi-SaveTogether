@@ -65,7 +65,7 @@ This page is for platform administrators. It provides access to administrative f
 
 ## Interacting with Smart Contracts
 
-The frontend uses the `wagmi` library to interact with the smart contracts. The `wagmi` configuration can be found in `lib/viem.ts`. This file sets up the connection to the blockchain and defines the contract ABIs and addresses.
+The frontend uses the `wagmi` library to interact with the smart contracts. The runtime configuration lives in `pages/_app.tsx`, which picks a chain definition from `lib/chains.ts` based on environment variables.
 
 Throughout the application, `wagmi`'s React Hooks are used to:
 
@@ -73,6 +73,25 @@ Throughout the application, `wagmi`'s React Hooks are used to:
 *   Write data to the smart contracts (e.g., depositing savings, creating a group, repaying a loan).
 
 This approach provides a seamless and reactive user experience, with the UI automatically updating in response to changes on the blockchain.
+
+## Configuring the Trust Testnet Deployment
+
+The current on-chain deployment lives on the Trust testnet (chain ID `252501`).
+
+1. Copy `.env.example` to `app/.env.local` (and optionally to the repo root if you run scripts).
+2. Ensure the following variables are present (values are pre-filled in the template with the live deployment addresses):
+   * `NEXT_PUBLIC_NETWORK=trust`
+   * `NEXT_PUBLIC_TRUST_RPC_URL=https://eth.didlab.org`
+   * `NEXT_PUBLIC_CONTRACT_*` entries that point to the deployed contracts.
+   * `NEXT_PUBLIC_STABLE_TOKEN=0x196352460396EE701e419439837FDFf5C451A4c6` (LabUSDT).
+3. Restart `npm run dev` so Next.js picks up the new environment.
+4. In MetaMask add a custom network with:
+   * RPC URL: `https://eth.didlab.org`
+   * Chain ID: `252501`
+   * Symbol: `TT`
+   * Block explorer: `https://explorer.didlab.org`
+
+With this configuration, the UI connects to the Trust testnet deployment and displays live contract data.
 
 ---
 

@@ -184,7 +184,15 @@ Integrate these commands in CI/CD to block regressions before deployment.
 ## Deployment
 
 1. Export the required environment variables (see `.env.example`).
-2. Deploy contracts to Linea Sepolia:
+2. **DIDLab evaluation:** follow the mandatory checklist in [`docs/didlab-deployment.md`](docs/didlab-deployment.md) and capture the artefacts needed for the LMS project update.
+3. Deploy contracts to DIDLab when preparing evaluation submissions:
+   ```bash
+   forge script script/00_deploy_all.s.sol \
+     --rpc-url https://eth.didlab.org \
+     --broadcast
+   ```
+   Record contract addresses, transaction hashes, and interaction receipts on https://explorer.didlab.org.
+4. For Linea Sepolia iterations:
    ```bash
    forge script script/00_deploy_all.s.sol \
      --rpc-url $LINEA_SEPOLIA_RPC_URL \
@@ -194,9 +202,9 @@ Integrate these commands in CI/CD to block regressions before deployment.
      --rpc-url $LINEA_SEPOLIA_RPC_URL \
      --broadcast
    ```
-3. Record the emitted addresses in `script/addresses.json` and distribute them to the frontend + subgraph teams.
-4. Run the smoke tests and operational guidance in [`docs/runbook.md`](docs/runbook.md).
-5. Promote to Linea Mainnet after satisfying governance sign-off and mainnet funding requirements.
+5. Record the emitted addresses in `script/addresses.json` and distribute them to the frontend + subgraph teams.
+6. Run the smoke tests and operational guidance in [`docs/runbook.md`](docs/runbook.md).
+7. Promote to Linea Mainnet after satisfying governance sign-off and mainnet funding requirements.
 
 ## Documentation Index
 

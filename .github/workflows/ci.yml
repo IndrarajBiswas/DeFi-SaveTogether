@@ -13,17 +13,14 @@ jobs:
           version: latest
       - name: Install deps
         run: |
-          cd linea-microfinance
           forge install OpenZeppelin/openzeppelin-contracts --no-commit
           forge install foundry-rs/forge-std --no-commit
       - name: Build & test contracts
         run: |
-          cd linea-microfinance
           forge build
           forge test -vvv
       - name: Build app
         run: |
-          cd linea-microfinance/app
+          cd app
           npm i --silent
           npm run build --if-present
-

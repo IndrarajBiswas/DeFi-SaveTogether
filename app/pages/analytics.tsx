@@ -171,7 +171,7 @@ export default function AnalyticsPage() {
           Deploy the SaveTogether subgraph to enable historical data aggregation and advanced analytics.
         </p>
         <div style={{ background: 'var(--gray-50)', padding: '1.5rem', borderRadius: '8px' }}>
-          <h3 style={{ marginTop: 0, fontSize: '1rem' }}>What you'll get:</h3>
+          <h3 style={{ marginTop: 0, fontSize: '1rem' }}>What you&apos;ll get:</h3>
           <ul style={{ marginBottom: 0, paddingLeft: '1.5rem' }}>
             <li>Historical transaction data</li>
             <li>User growth and retention metrics</li>

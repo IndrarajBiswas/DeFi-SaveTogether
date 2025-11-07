@@ -1,14 +1,14 @@
-# Linea Microfinance — End‑to‑End Project Brief (MVP)
+# DIDLab Microfinance — End‑to‑End Project Brief (MVP)
 
-This brief packages everything a non‑technical or technical audience needs to understand, evaluate, and demo the Grameen‑style, joint‑liability microfinance MVP on Linea. Use it as the single source for slides, demos, and hand‑offs.
+This brief packages everything a non‑technical or technical audience needs to understand, evaluate, and demo the Grameen‑style, joint‑liability microfinance MVP on the DIDLab network. Use it as the single source for slides, demos, and hand‑offs.
 
 ---
 
 ## 1) Executive Summary
 
 - Mission: Enable small groups (5–8) to access rotating credit with joint liability, savings discipline, and transparent on‑chain accounting.
-- Networks: Linea Sepolia (pilot, 59141) → Linea Mainnet (59144).
-- Asset: USDC.e (or canonical USDC when available).
+- Network: DIDLab Trust testnet (Chain ID 252501).
+- Asset: LabUSDT (6 decimals).
 - Model: Savings‑first, one active loan per borrower, simple interest, weekly installments, group stake backstop.
 - Privacy: No PII on‑chain; only hashes/CIDs for proofs; KYC via off‑chain VC issuers + on‑chain attestations.
 
@@ -18,7 +18,7 @@ This brief packages everything a non‑technical or technical audience needs to 
 
 - Group size: 5–8; approvals: 3‑of‑5 (majority)
 - Savings rule: Min 4 consecutive weekly deposits before first loan (≥ 2 for later loans)
-- Loan caps: 25–250 USDC (MVP)
+- Loan caps: 25–250 LabUSDT (MVP)
 - Rate: 2.0% simple interest per 4‑week block
 - Terms: 4, 8, or 12 weeks; Grace: 7 days
 - Backstop: Group stake = 5% of max exposure (locked, slash on default)
@@ -33,7 +33,7 @@ This brief packages everything a non‑technical or technical audience needs to 
 - Contracts (Foundry): `AttestationRegistry`, `SavingsPool`, `GroupVault`, `CreditLine`, `Treasury`, `GovernanceLite`, `libs/Maths`.
 - Subgraph (The Graph): Indexes Group/Loan/Savings events; provides read models for the app.
 - App (Next.js + viem/wagmi): UX for onboarding, savings, group formation, approvals, loan desk, repayments, and admin.
-- CI/CD: GitHub Actions (lint/build/test), scripted deploys to Linea networks.
+- CI/CD: GitHub Actions (lint/build/test), scripted deploys to DIDLab.
 - Reference: [`docs/architecture.md`](docs/architecture.md) contains component responsibilities and sequence diagrams.
 
 ---
@@ -46,7 +46,7 @@ This brief packages everything a non‑technical or technical audience needs to 
 - Core functions: `setIssuer(issuer,bool)`, `attest(user,level)`, `isEligible(user,minLevel)`
 
 ### SavingsPool
-- Purpose: Weekly USDC deposits; track consecutive streaks.
+- Purpose: Weekly LabUSDT deposits; track consecutive streaks.
 - Events: `Deposited(user,amount,weekIdx)`, `Withdrawn(user,amount)`
 - Core: `deposit(amount)`, `withdraw(amount)`, `consecutiveWeeks(user)`
 
@@ -98,8 +98,8 @@ This brief packages everything a non‑technical or technical audience needs to 
 ## 6) Frontend (Next.js + viem)
 
 - Pages: `/` (Overview), `/savings`, `/groups`, `/loans`, `/admin`.
-- Chain config: Custom Linea Sepolia chain; mainnet via `viem/chains` `linea`.
-- Env: `NEXT_PUBLIC_NETWORK` (sepolia|mainnet), `NEXT_PUBLIC_LINEA_(SEPOLIA_)RPC_URL`, `NEXT_PUBLIC_SUBGRAPH_URL`.
+- Chain config: Custom DIDLab chain definition in `app/lib/chains.ts`.
+- Env: `NEXT_PUBLIC_DIDLAB_RPC_URL`, `NEXT_PUBLIC_SUBGRAPH_URL`.
 - UX principles: Client‑side checks (KYC level, streak, exposure), allowance helpers, toasts, loading states.
 - Current status: Static forms scaffolded; ready to wire to viem/wagmi actions and subgraph queries.
 
@@ -130,11 +130,11 @@ See: `docs/params.md` for table and notes.
 
 ## 9) Manual QA Script (Testnet Demo)
 
-1. Deploy to Linea Sepolia; record addresses.
-2. Fund demo wallets with test USDC. Attest 5–6 users (level 1).
+1. Deploy to DIDLab; record addresses.
+2. Fund demo wallets with test LabUSDT. Attest 5–6 users (level 1).
 3. Form a group (5 members), set minApprovals=3; lock 5% stake.
 4. Deposit weekly savings for 4 rounds (can warp in tests).
-5. Request 100 USDC / 8 weeks; gather 3 approvals; loan opens.
+5. Request 100 LabUSDT / 8 weeks; gather 3 approvals; loan opens.
 6. Repay 2 installments; reschedule once (+2 weeks); continue repayment.
 7. Default a second loan to test `slashOnDefault` and exposure reduction.
 8. Validate subgraph dashboards (PAR30, on‑time rate).
@@ -172,8 +172,8 @@ linea-microfinance/
 ### Environment
 
 Copy `.env.example` → `.env` and set:
-- `LINEA_RPC_URL`, `LINEA_SEPOLIA_RPC_URL`, `PRIVATE_KEY_DEPLOYER`
-- `USDC_ADDRESS_SEPOLIA`, `USDC_ADDRESS_MAINNET`, `OWNER_ADDRESS`
+- `DIDLAB_RPC_URL`, `PRIVATE_KEY_DEPLOYER`
+- `LABUSDT_ADDRESS`, `OWNER_ADDRESS`
 - `NEXT_PUBLIC_*` values for the app
 
 ### Commands
@@ -182,8 +182,8 @@ Contracts
 ```bash
 forge build
 forge test -vvv
-forge script script/00_deploy_all.s.sol --rpc-url $LINEA_SEPOLIA_RPC_URL --broadcast
-forge script script/01_seed_params.s.sol --rpc-url $LINEA_SEPOLIA_RPC_URL --broadcast
+forge script script/00_deploy_all.s.sol --rpc-url $DIDLAB_RPC_URL --broadcast --legacy --with-gas-price 2gwei
+forge script script/01_seed_params.s.sol --rpc-url $DIDLAB_RPC_URL --broadcast --legacy --with-gas-price 2gwei
 ```
 
 Subgraph
@@ -211,7 +211,7 @@ cd app && npm i && npm run dev
 ## 13) Demo Checklist (Slides)
 
 - Problem: Access to credit via social collateral; limited infra; need transparency.
-- Solution: Group lending with savings discipline and joint liability on Linea.
+- Solution: Group lending with savings discipline and joint liability on DIDLab.
 - Live Walkthrough: 
   1) Attestation → 2) Savings streak → 3) Group + stake → 4) Approvals → 5) Loan → 6) Repay/Reschedule → 7) Default & Slash → 8) Pause.
 - Safety: Guards, events, subgraph, and governance.
@@ -227,4 +227,3 @@ cd app && npm i && npm run dev
 - Parameters: `docs/params.md`
 
 Use this brief to craft a senior‑stakeholder deck or a hands‑on demo.
-

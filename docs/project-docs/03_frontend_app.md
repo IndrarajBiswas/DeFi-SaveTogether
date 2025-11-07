@@ -1,6 +1,6 @@
 # Frontend Application
 
-This document provides an overview of the Next.js web application that serves as the primary user interface for the Linea Microfinance platform.
+This document provides an overview of the Next.js web application that serves as the primary user interface for the DIDLab Microfinance platform.
 
 ## Technology Stack
 
@@ -33,9 +33,9 @@ The home page provides an overview of the platform, a checklist for new users to
 
 This page is for managing user savings. It allows users to:
 
-*   Deposit and withdraw USDC.
+*   Deposit and withdraw LabUSDT.
 *   Track their weekly savings streak.
-*   Approve the `SavingsPool` contract to spend their USDC.
+*   Approve the `SavingsPool` contract to spend their LabUSDT.
 
 ### `/groups`
 
@@ -74,14 +74,13 @@ Throughout the application, `wagmi`'s React Hooks are used to:
 
 This approach provides a seamless and reactive user experience, with the UI automatically updating in response to changes on the blockchain.
 
-## Configuring the Trust Testnet Deployment
+## Configuring the DIDLab Deployment
 
 The current on-chain deployment lives on the Trust testnet (chain ID `252501`).
 
 1. Copy `.env.example` to `app/.env.local` (and optionally to the repo root if you run scripts).
 2. Ensure the following variables are present (values are pre-filled in the template with the live deployment addresses):
-   * `NEXT_PUBLIC_NETWORK=trust`
-   * `NEXT_PUBLIC_TRUST_RPC_URL=https://eth.didlab.org`
+   * `NEXT_PUBLIC_DIDLAB_RPC_URL=https://eth.didlab.org`
    * `NEXT_PUBLIC_CONTRACT_*` entries that point to the deployed contracts.
    * `NEXT_PUBLIC_STABLE_TOKEN=0x196352460396EE701e419439837FDFf5C451A4c6` (LabUSDT).
 3. Restart `npm run dev` so Next.js picks up the new environment.

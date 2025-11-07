@@ -13,7 +13,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract DeployAll is Script {
   function run() external {
     address admin = vm.envAddress("OWNER_ADDRESS");
-    address usdc = vm.envAddress("USDC_ADDRESS_SEPOLIA");
+    address labUsdt = vm.envAddress("LABUSDT_ADDRESS");
 
     vm.startBroadcast();
     AttestationRegistry reg = new AttestationRegistry(admin);
@@ -22,10 +22,10 @@ contract DeployAll is Script {
 
     GovernanceLite gov = new GovernanceLite(admin);
 
-    GroupVault gv = new GroupVault(IERC20(usdc), admin);
-    SavingsPool sp = new SavingsPool(IERC20(usdc));
+    GroupVault gv = new GroupVault(IERC20(labUsdt), admin);
+    SavingsPool sp = new SavingsPool(IERC20(labUsdt));
     CreditLine cl = new CreditLine(
-      IERC20(usdc),
+      IERC20(labUsdt),
       IAttestationRegistry(address(reg)),
       ISavingsPool(address(sp)),
       IGroupVault(address(gv)),

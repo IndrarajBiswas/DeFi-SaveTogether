@@ -1,6 +1,6 @@
 # Governance and Security
 
-This document provides a detailed overview of the governance model and security considerations for the Linea Microfinance platform.
+This document provides a detailed overview of the governance model and security considerations for the DIDLab Microfinance platform.
 
 ## Governance Model
 
@@ -38,7 +38,7 @@ The platform uses a role-based access control system, built on top of OpenZeppel
 
 ## Security Considerations
 
-Security is a top priority for the Linea Microfinance platform. The following are some of the key security considerations that have been taken into account.
+Security is a top priority for the DIDLab Microfinance platform. The following are some of the key security considerations that have been taken into account.
 
 ### Smart Contract Audits
 
@@ -63,4 +63,4 @@ The contracts are written with security best practices in mind:
 
 ---
 
-This concludes the main documentation for the Linea Microfinance project. You should now have a comprehensive understanding of the platform and how it works.
+This concludes the main documentation for the DIDLab Microfinance project. You should now have a comprehensive understanding of the platform and how it works.

@@ -1,12 +1,12 @@
 # Subgraph (Data Indexing)
 
-This document explains the role of the subgraph in the Linea Microfinance platform and how it is used to index and query on-chain data.
+This document explains the role of the subgraph in the DIDLab Microfinance platform and how it is used to index and query on-chain data.
 
 ## What is a Subgraph?
 
 A subgraph is a custom API built on top of the Ethereum blockchain, powered by The Graph. It allows for efficient querying of on-chain data without having to interact directly with the smart contracts. This is particularly useful for building user interfaces that require complex data filtering, sorting, and pagination.
 
-## The Linea Microfinance Subgraph
+## The DIDLab Microfinance Subgraph
 
 The subgraph for this project is located in the `subgraph/` directory. It is designed to track all the key events and entities within the platform, providing a rich and queryable dataset.
 
@@ -20,7 +20,7 @@ This is the main configuration file for the subgraph. It defines:
 
 ### `schema.graphql`
 
-This file defines the data schema for the subgraph. It specifies the entities that will be stored and the relationships between them. The key entities in the Linea Microfinance subgraph are:
+This file defines the data schema for the subgraph. It specifies the entities that will be stored and the relationships between them. The key entities in the DIDLab Microfinance subgraph are:
 
 *   **`User`**: Represents a user of the platform.
 *   **`Group`**: Represents a user group.

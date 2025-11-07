@@ -17,7 +17,7 @@ export default function LoansPage() {
 
   const handleRequestLoan = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault()
-    window.alert(`Mock openLoan for ${principal} USDC over ${term} weeks`)
+    window.alert(`Mock openLoan for ${principal} LabUSDT over ${term} weeks`)
   }
 
   return (
@@ -38,7 +38,7 @@ export default function LoansPage() {
         <h2>Request Loan</h2>
         <form className="form" onSubmit={handleRequestLoan}>
           <label>
-            Principal (USDC)
+            Principal (LabUSDT)
             <input
               type="number"
               min={25}
@@ -60,7 +60,7 @@ export default function LoansPage() {
           </label>
           <button type="submit">Simulate openLoan()</button>
         </form>
-        <p className="tag">Estimated weekly payment: {weeklyPayment.toFixed(2)} USDC</p>
+        <p className="tag">Estimated weekly payment: {weeklyPayment.toFixed(2)} LabUSDT</p>
       </section>
 
       <section className="card">
@@ -68,7 +68,7 @@ export default function LoansPage() {
         <ol className="list">
           <li>Borrower submits request and shares pseudo loan ID (borrower address) with group.</li>
           <li>Peers call <code>GroupVault.approveLoan</code> until minimum approvals reached.</li>
-          <li>Borrower executes <code>openLoan</code>; USDC transfers from CreditLine treasury balance.</li>
+          <li>Borrower executes <code>openLoan</code>; LabUSDT transfers from CreditLine treasury balance.</li>
         </ol>
       </section>
 

@@ -8,7 +8,7 @@ backgroundColor: #fff
 <!-- _class: lead -->
 
 # DeFi SaveTogether
-## Linea Microfinance MVP
+## DIDLab Microfinance MVP
 
 **Grameen-Style Group Lending on Blockchain**
 
@@ -22,9 +22,9 @@ Transparent Credit • Savings Discipline • Joint Liability
 
 **Key Stats:**
 - 6 Production-Ready Smart Contracts
-- Deployed on 3 Networks (DIDLab, Linea Sepolia, Mainnet-ready)
+- Deployed on DIDLab (Chain ID 252501) with mainnet-ready architecture
 - Full-Stack Implementation (Contracts + Subgraph + Frontend)
-- $25-$250 USDC Loan Range (MVP)
+- $25-$250 LabUSDT Loan Range (MVP)
 
 **Status:** Production-ready for DIDLab evaluation
 
@@ -48,7 +48,7 @@ Traditional microfinance faces challenges:
 |---------|-------|
 | **Group Size** | 3-12 members (typical: 5-8) |
 | **Savings Requirement** | 4 consecutive weekly deposits |
-| **Loan Range** | $25-$250 USDC (MVP) |
+| **Loan Range** | $25-$250 LabUSDT (MVP) |
 | **Interest Rate** | 2% simple interest per 4 weeks |
 | **Loan Terms** | 4, 8, or 12 weeks |
 | **Group Stake** | 5% of max exposure (slashable) |
@@ -61,11 +61,11 @@ Traditional microfinance faces challenges:
 
 **1. KYC Attestation** → Off-chain verification, on-chain registry
 
-**2. Savings Phase** → Weekly USDC deposits, build 4-week streak
+**2. Savings Phase** → Weekly LabUSDT deposits, build 4-week streak
 
 **3. Group Formation** → 5 members join, lock 5% stake
 
-**4. Loan Request** → Request 100 USDC for 8 weeks
+**4. Loan Request** → Request 100 LabUSDT for 8 weeks
 
 **5. Group Approval** → 3+ members approve
 
@@ -137,8 +137,8 @@ Traditional microfinance faces challenges:
 ✓ Savings streak ≥ 4 weeks (first loan)
 ✓ Group approval quorum met
 ✓ One active loan per borrower
-✓ Principal within bounds (25-250 USDC)
-✓ Group exposure < 2000 USDC cap
+✓ Principal within bounds (25-250 LabUSDT)
+✓ Group exposure < 2000 LabUSDT cap
 
 **Security Controls:**
 - OpenZeppelin: ReentrancyGuard, SafeERC20, AccessControl
@@ -152,7 +152,7 @@ Traditional microfinance faces challenges:
 
 **Interest Calculation:**
 - Simple interest: 2% per 4-week block
-- Example: 100 USDC loan for 8 weeks = 4 USDC interest
+- Example: 100 LabUSDT loan for 8 weeks = 4 LabUSDT interest
 
 **Fees:**
 - Platform fee: 0.5% of principal (to Treasury)
@@ -191,7 +191,7 @@ User Action → Smart Contract → Event Emission
 **Blockchain Layer:**
 - Solidity 0.8.24 (Foundry framework)
 - OpenZeppelin security libraries
-- EVM-compatible chains (Linea, DIDLab)
+- EVM-compatible chain (DIDLab)
 
 **Indexing Layer:**
 - The Graph subgraph
@@ -213,16 +213,14 @@ User Action → Smart Contract → Event Emission
 | Network | Chain ID | Status | Purpose |
 |---------|----------|--------|---------|
 | **DIDLab** | 252501 | ✅ Deployed | Evaluation/Testing |
-| **Linea Sepolia** | 59141 | 🔄 Ready | Testnet Iteration |
-| **Linea Mainnet** | 59144 | ⏳ Pending | Production |
 
 **DIDLab Deployed Contracts:**
-- AttestationRegistry: `0xD2eDc0F2420Fb493d946D4ae6Df814607C9B5B74`
-- CreditLine: `0x83b9D4c6773fa0fDe05313591b6295611DaA9F04`
-- GroupVault: `0xF2fa6d65f190dCBF340251be546Bdc4E57FFBd99`
-- SavingsPool: `0x893297a2B1512e5E8882fF2D8F4053F2D71b1AA5`
-- Treasury: `0x3206c7623A7E516bc421449711673817F0864f23`
-- GovernanceLite: `0x9aF98Fb8aFB39eDB1A5Eb4455a4d7161486dE8b6`
+- AttestationRegistry: `0x2a9775Ea77751580c749b79cD611Eb6e30Fa9Bbd`
+- CreditLine: `0xD7A9Ed10c7A50C8eD3A6cC450A7cDcDE7Fb9eDAa`
+- GroupVault: `0xa0F8BFa8aa5E0a6Cbe7EB8c6BCF56E0e75Bfb39B`
+- SavingsPool: `0x585EE16799bEE3cE0A221B2D4aC12313158344cE`
+- Treasury: `0x3111F51e8cd05E27157F16eE5DfC235B19808352`
+- GovernanceLite: `0xE518d5027558cF834B5A50D06ABAC82979DA3112`
 
 ---
 
@@ -268,7 +266,7 @@ User Action → Smart Contract → Event Emission
 - No hidden fees or charges
 
 **Accessibility:**
-- Low loan minimums ($25 USDC)
+- Low loan minimums ($25 LabUSDT)
 - Savings-first (no credit score needed)
 - Decentralized, permissionless (post-KYC)
 
@@ -288,8 +286,8 @@ User Action → Smart Contract → Event Emission
 - Comprehensive test coverage
 
 **Economic Risks:**
-- Exposure caps per group (2000 USDC)
-- Principal bounds (25-250 USDC)
+- Exposure caps per group (2000 LabUSDT)
+- Principal bounds (25-250 LabUSDT)
 - Grace period before defaults (7 days)
 - Emergency pause mechanism
 
@@ -324,12 +322,12 @@ User Action → Smart Contract → Event Emission
 **Live Walkthrough:**
 
 1. **Setup** - 5 users get KYC attestations (level 1)
-2. **Savings** - Each deposits 10 USDC weekly for 4 weeks
-3. **Group Formation** - Create group, lock 100 USDC stake (5%)
-4. **Loan Request** - User A requests 100 USDC for 8 weeks
+2. **Savings** - Each deposits 10 LabUSDT weekly for 4 weeks
+3. **Group Formation** - Create group, lock 100 LabUSDT stake (5%)
+4. **Loan Request** - User A requests 100 LabUSDT for 8 weeks
 5. **Approvals** - 3 members approve the loan
-6. **Disbursement** - CreditLine disburses 100 USDC to User A
-7. **Repayment** - User A repays weekly (13 USDC × 8 weeks)
+6. **Disbursement** - CreditLine disburses 100 LabUSDT to User A
+7. **Repayment** - User A repays weekly (13 LabUSDT × 8 weeks)
 8. **Default Scenario** - User B defaults, stake slashed
 
 **Observable On-Chain:** All events on DIDLab explorer
@@ -482,7 +480,7 @@ DeFi-SaveTogether/
 **Quick Start:**
 ```bash
 # Deploy contracts
-forge script script/00_deploy_all.s.sol --broadcast
+forge script script/00_deploy_all.s.sol --rpc-url https://eth.didlab.org --broadcast --legacy --with-gas-price 2gwei
 
 # Start frontend
 cd app && npm run dev
@@ -502,11 +500,11 @@ cd subgraph && graph deploy
 - Faucet: https://faucet.didlab.org
 - Gas Token: TRUST (TT)
 
-**Linea Sepolia (Testnet):**
+**DIDLab (Testnet):**
 - Chain ID: 59141
 - Purpose: Development and iteration
 
-**Linea Mainnet (Production):**
+**DIDLab (Production):**
 - Chain ID: 59144
 - Status: Awaiting governance approval
 
@@ -528,7 +526,7 @@ cd subgraph && graph deploy
 
 **For Partners:**
 - KYC issuer integration API
-- USDC stablecoin compatibility
+- LabUSDT stablecoin compatibility
 - Multi-network deployment scripts
 
 ---
@@ -562,7 +560,7 @@ cd subgraph && graph deploy
 - Event-driven architecture
 
 **Scalability Approach:**
-- Linea L2 for low gas costs
+- DIDLab network for low gas costs
 - Off-chain indexing via The Graph
 - Stateless frontend (client-side validation)
 
@@ -726,14 +724,14 @@ Network: DIDLab (Chain ID: 252501)
 RPC: https://eth.didlab.org
 Explorer: https://explorer.didlab.org
 
-AttestationRegistry: 0xD2eDc0F2420Fb493d946D4ae6Df814607C9B5B74
-SavingsPool:         0x893297a2B1512e5E8882fF2D8F4053F2D71b1AA5
-GroupVault:          0xF2fa6d65f190dCBF340251be546Bdc4E57FFBd99
-CreditLine:          0x83b9D4c6773fa0fDe05313591b6295611DaA9F04
-Treasury:            0x3206c7623A7E516bc421449711673817F0864f23
-GovernanceLite:      0x9aF98Fb8aFB39eDB1A5Eb4455a4d7161486dE8b6
+AttestationRegistry: 0x2a9775Ea77751580c749b79cD611Eb6e30Fa9Bbd
+SavingsPool:         0x585EE16799bEE3cE0A221B2D4aC12313158344cE
+GroupVault:          0xa0F8BFa8aa5E0a6Cbe7EB8c6BCF56E0e75Bfb39B
+CreditLine:          0xD7A9Ed10c7A50C8eD3A6cC450A7cDcDE7Fb9eDAa
+Treasury:            0x3111F51e8cd05E27157F16eE5DfC235B19808352
+GovernanceLite:      0xE518d5027558cF834B5A50D06ABAC82979DA3112
 
-USDC (DIDLab):       0x196352460396EE701e419439837FDFf5C451A4c6
+LabUSDT (DIDLab):       0x196352460396EE701e419439837FDFf5C451A4c6
 ```
 
 **Verify on:** https://explorer.didlab.org/address/<contract-address>
@@ -771,12 +769,12 @@ USDC (DIDLab):       0x196352460396EE701e419439837FDFf5C451A4c6
 | minAttestationLevel | 1 | Minimum KYC level to borrow |
 | rateBpsPer4Weeks | 200 | Interest rate (2%) |
 | platformFeeBps | 50 | Platform fee (0.5%) |
-| minPrincipal | 25 USDC | Minimum loan amount |
-| maxPrincipal | 250 USDC | Maximum loan amount |
+| minPrincipal | 25 LabUSDT | Minimum loan amount |
+| maxPrincipal | 250 LabUSDT | Maximum loan amount |
 | terms | [4, 8, 12] | Allowed loan terms (weeks) |
 | graceDays | 7 | Days before default |
 | groupStakeBps | 500 | Group stake (5%) |
-| groupMaxExposure | 2000 USDC | Max group loan total |
+| groupMaxExposure | 2000 LabUSDT | Max group loan total |
 
 ---
 
@@ -871,7 +869,9 @@ forge test -vvv
 ```bash
 forge script script/00_deploy_all.s.sol \
   --rpc-url https://eth.didlab.org \
-  --broadcast
+  --broadcast \
+  --legacy \
+  --with-gas-price 2gwei
 ```
 
 **Start Frontend:**

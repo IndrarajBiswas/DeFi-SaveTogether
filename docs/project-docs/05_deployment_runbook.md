@@ -1,18 +1,18 @@
 # Deployment Runbook
 
-This document provides a step-by-step guide for deploying and managing the Linea Microfinance application on a live network. It is intended for developers and administrators responsible for the platform's operations.
+This document provides a step-by-step guide for deploying and managing the DIDLab Microfinance application on a live network. It is intended for developers and administrators responsible for the platform's operations.
 
 ## Pre-Deployment Checklist
 
 Before you begin the deployment process, ensure you have completed the following:
 
-1.  **Environment Variables**: Your `.env` file is fully configured with the correct values for the target network (e.g., Linea Mainnet). This includes:
-    *   `LINEA_MAINNET_RPC_URL`
+1.  **Environment Variables**: Your `.env` file is fully configured with the correct values for the target network (DIDLab). This includes:
+    *   `DIDLAB_RPC_URL`
     *   `PRIVATE_KEY_DEPLOYER` (this account will have administrative privileges)
-    *   `USDC_ADDRESS_MAINNET`
-    *   `GOVERNANCE_OWNER_MAINNET`
+    *   `LABUSDT_ADDRESS`
+    *   `OWNER_ADDRESS`
 
-2.  **Gas**: The deployer account is funded with sufficient ETH to cover the gas costs of the deployment.
+2.  **Gas**: The deployer account is funded with sufficient TRUST (TT) to cover the gas costs of the deployment.
 
 3.  **Foundry**: You have the latest version of Foundry installed and have run `forge install` to get the correct dependencies.
 
@@ -25,7 +25,7 @@ The deployment process is automated using Foundry scripts. It is divided into tw
 This script deploys all the smart contracts and sets up the initial access control roles.
 
 ```bash
-forge script script/00_deploy_all.s.sol --rpc-url $LINEA_MAINNET_RPC_URL --broadcast --verify
+forge script script/00_deploy_all.s.sol --rpc-url $DIDLAB_RPC_URL --broadcast --legacy --with-gas-price 2gwei --verify
 ```
 
 *   `--rpc-url`: Specifies the RPC endpoint for the target network.
@@ -39,7 +39,7 @@ Upon successful execution, this script will save the addresses of the deployed c
 This script initializes the `GovernanceLite` contract with the initial set of parameters.
 
 ```bash
-forge script script/01_seed_params.s.sol --rpc-url $LINEA_MAINNET_RPC_URL --broadcast
+forge script script/01_seed_params.s.sol --rpc-url $DIDLAB_RPC_URL --broadcast --legacy --with-gas-price 2gwei
 ```
 
 It is crucial to review the parameters in `script/01_seed_params.s.sol` before running this script to ensure they are appropriate for the target network.

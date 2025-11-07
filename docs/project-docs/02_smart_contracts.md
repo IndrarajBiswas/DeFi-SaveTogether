@@ -1,6 +1,6 @@
 # Smart Contracts
 
-This document provides a detailed explanation of the smart contracts that form the core of the Linea Microfinance platform. All contracts are written in Solidity and designed to be modular and upgradeable.
+This document provides a detailed explanation of the smart contracts that form the core of the DIDLab Microfinance platform. All contracts are written in Solidity and designed to be modular and upgradeable.
 
 ## Contract Architecture
 
@@ -56,7 +56,7 @@ The `SavingsPool` contract is a simple contract for managing user savings.
 
 ### Key Functions
 
-*   `deposit()`: Allows a user to deposit USDC into the savings pool. It also tracks the user's weekly savings streak.
+*   `deposit()`: Allows a user to deposit LabUSDT into the savings pool. It also tracks the user's weekly savings streak.
 *   `withdraw()`: Allows a user to withdraw their savings.
 *   `consecutiveWeeks()`: Returns the number of consecutive weeks a user has made a deposit.
 

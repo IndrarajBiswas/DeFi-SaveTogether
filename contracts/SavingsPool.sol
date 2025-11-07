@@ -6,7 +6,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Maths} from "./libs/Maths.sol";
 
-/// @notice Users deposit weekly savings in USDC; track consecutive weeks
+/// @notice Users deposit weekly savings in LabUSDT; track consecutive weeks
 contract SavingsPool is ReentrancyGuard {
   using SafeERC20 for IERC20;
 

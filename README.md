@@ -1,6 +1,6 @@
-# Linea Microfinance – Joint-Liability Lending MVP
+# DIDLab Microfinance – Joint-Liability Lending MVP
 
-A full-stack reference implementation of Grameen-style group lending on Linea. The repository bundles Solidity contracts, a The Graph subgraph, deployment scripts, thorough documentation, and a Next.js pilot web app so that product, protocol, and operations teams can work from a single source of truth.
+A full-stack reference implementation of Grameen-style group lending on the DIDLab Trust network. The repository bundles Solidity contracts, a The Graph subgraph, deployment scripts, thorough documentation, and a Next.js pilot web app so that product, protocol, and operations teams can work from a single source of truth.
 
 > **Mission:** unlock transparent, savings-first credit for small groups through shared incentives, verifiable attestations, and low-cost on-chain rails.
 
@@ -22,7 +22,7 @@ A full-stack reference implementation of Grameen-style group lending on Linea. T
 
 ## Overview
 
-Linea Microfinance follows a "savings before credit" philosophy inspired by Grameen Bank. Borrowers join small groups, prove consistent savings, and backstop each other through joint liability and slashable stake. Governance and emergency controls are designed for pilot rollouts on Linea Sepolia with a migration path to Linea Mainnet.
+DIDLab Microfinance follows a "savings before credit" philosophy inspired by Grameen Bank. Borrowers join small groups, prove consistent savings, and backstop each other through joint liability and slashable stake. Governance and emergency controls are designed for pilot rollouts on DIDLab (Chain ID 252501).
 
 Key goals:
 
@@ -39,7 +39,7 @@ flowchart LR
     Issuers[Attestation<br/>Issuers]
     Ops[Ops Runbook &<br/>Parameter Sheets]
   end
-  subgraph Linea Network
+  subgraph DIDLab Network
     AR[AttestationRegistry]
     SP[SavingsPool]
     GV[GroupVault]
@@ -119,16 +119,15 @@ cp .env.example .env
 
 | Variable | Used By | Description |
 | --- | --- | --- |
-| `LINEA_RPC_URL` | Contracts, app | HTTPS RPC endpoint for Linea Mainnet deployments. |
-| `LINEA_SEPOLIA_RPC_URL` | Contracts, app | HTTPS RPC endpoint for Linea Sepolia testnet. |
+| `DIDLAB_RPC_URL` | Contracts, app | HTTPS RPC endpoint for DIDLab (`https://eth.didlab.org`). |
 | `PRIVATE_KEY_DEPLOYER` | Foundry scripts | Deployer private key (never commit this). |
 | `SUBGRAPH_HOST` | Subgraph | Graph node host for local development. |
-| `USDC_ADDRESS_SEPOLIA` / `USDC_ADDRESS_MAINNET` | Contracts, app | Stablecoin contract addresses used for deposits and loans. |
+| `LABUSDT_ADDRESS` | Contracts, app | ERC20 stablecoin (LabUSDT) address for deposits and loans. |
 | `OWNER_ADDRESS` | Scripts | Governance owner / multisig address. |
 | `ATTESTATION_REGISTRY` | App | Optional override when attaching to existing deployments. |
-| `NEXT_PUBLIC_NETWORK` | App | `sepolia` or `mainnet` for runtime configuration. |
-| `NEXT_PUBLIC_LINEA_SEPOLIA_RPC_URL` / `NEXT_PUBLIC_LINEA_RPC_URL` | App | Client-side RPCs for wagmi/viem. |
+| `NEXT_PUBLIC_DIDLAB_RPC_URL` | App | Client-side RPC for wagmi/viem (defaults to DIDLab). |
 | `NEXT_PUBLIC_SUBGRAPH_URL` | App | HTTP endpoint of the deployed subgraph. |
+| `NEXT_PUBLIC_CONTRACT_*` | App | Addresses for AttestationRegistry, SavingsPool, GroupVault, CreditLine, GovernanceLite, Treasury. |
 
 ## Local Development Workflows
 
@@ -189,22 +188,15 @@ Integrate these commands in CI/CD to block regressions before deployment.
    ```bash
    forge script script/00_deploy_all.s.sol \
      --rpc-url https://eth.didlab.org \
-     --broadcast
+     --broadcast \
+     --legacy \
+     --with-gas-price 2gwei
    ```
    Record contract addresses, transaction hashes, and interaction receipts on https://explorer.didlab.org.
-4. For Linea Sepolia iterations:
-   ```bash
-   forge script script/00_deploy_all.s.sol \
-     --rpc-url $LINEA_SEPOLIA_RPC_URL \
-     --broadcast
-
-   forge script script/01_seed_params.s.sol \
-     --rpc-url $LINEA_SEPOLIA_RPC_URL \
-     --broadcast
-   ```
-5. Record the emitted addresses in `script/addresses.json` and distribute them to the frontend + subgraph teams.
+4. Run `forge script script/01_seed_params.s.sol --rpc-url https://eth.didlab.org --broadcast --legacy --with-gas-price 2gwei` to whitelist the issuer in `AttestationRegistry`.
+5. Record the emitted addresses in `script/addresses.json` (now populated) and distribute them to the frontend + subgraph teams.
 6. Run the smoke tests and operational guidance in [`docs/runbook.md`](docs/runbook.md).
-7. Promote to Linea Mainnet after satisfying governance sign-off and mainnet funding requirements.
+7. Capture artefacts for the LMS submission (transactions, ABI references, commit hash) as outlined in [`docs/didlab-deployment.md`](docs/didlab-deployment.md).
 
 ## Documentation Index
 

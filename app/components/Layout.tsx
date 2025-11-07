@@ -18,7 +18,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     <div className="app-shell">
       <header className="app-header">
         <div className="brand">
-          <span className="brand__title">Linea Microfinance</span>
+          <span className="brand__title">DIDLab Microfinance</span>
           <span className="brand__subtitle">Grameen-style group lending pilot</span>
         </div>
         <nav className="nav">
@@ -36,7 +36,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       </header>
       <main className="app-main">{children}</main>
       <footer className="app-footer">
-        <span>Linea Sepolia → Linea Mainnet rollout. See docs/runbook.md for deployment steps.</span>
+        <span>DIDLab Trust testnet rollout. See docs/runbook.md for deployment steps.</span>
       </footer>
     </div>
   )

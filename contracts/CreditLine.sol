@@ -123,7 +123,7 @@ contract CreditLine is AccessControl, Pausable, ReentrancyGuard {
     hasActiveLoan[borrower] = true;
     groupExposure[gid] = newExposure;
 
-    // disburse principal to borrower (pull USDC from this contract's balance — funded via admin for MVP)
+    // disburse principal to borrower (pull LabUSDT from this contract's balance — funded via admin for MVP)
     asset.safeTransfer(borrower, principal);
     emit LoanOpened(loanId, borrower, principal, rateBps, termWeeks, gid);
   }

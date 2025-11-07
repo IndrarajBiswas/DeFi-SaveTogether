@@ -1,6 +1,6 @@
 # Architecture Overview
 
-This document expands on the high-level diagram in the repository README. It explains how the smart contracts, subgraph, and frontend collaborate to deliver joint-liability lending on Linea.
+This document expands on the high-level diagram in the repository README. It explains how the smart contracts, subgraph, and frontend collaborate to deliver joint-liability lending on DIDLab.
 
 ## Component Summary
 
@@ -9,7 +9,7 @@ This document expands on the high-level diagram in the repository README. It exp
 | Contract | Responsibility | Notable Safeguards |
 | --- | --- | --- |
 | `AttestationRegistry.sol` | Maintains an allowlist of attesters and the attestation level for each borrower. | Only whitelisted issuers can attest; read-only helper `isEligible` is used to gate loan origination. |
-| `SavingsPool.sol` | Handles weekly USDC deposits and streak tracking for borrowers. | Uses calendar week indexes to prevent multiple deposits per period and records consecutive streaks for eligibility. |
+| `SavingsPool.sol` | Handles weekly LabUSDT deposits and streak tracking for borrowers. | Uses calendar week indexes to prevent multiple deposits per period and records consecutive streaks for eligibility. |
 | `GroupVault.sol` | Manages group membership, stake custody, and approval quorums for loan requests. | Enforces minimum approval counts, tracks stake balances, and exposes `slashOnDefault` for the credit line. |
 | `CreditLine.sol` | Opens loans, tracks repayments, marks defaults, and enforces borrower/group guard rails. | Requires attestations, savings streaks, approval quorums, rate/term bounds, one active loan per borrower, and group exposure caps. |
 | `Treasury.sol` | Collects platform fees and forwards funds to governance-owned wallets. | Only callable by the credit line; fees are swept to a governance-controlled address. |
@@ -68,6 +68,6 @@ sequenceDiagram
 - **Governance updates**: Admins call setters on `GovernanceLite` to tweak parameters such as rates, exposure caps, or savings streak requirements.
 - **Emergency pause**: Governance can halt state-changing functions via `GovernanceLite.pause()` while leaving read access intact.
 - **Stakeholder reporting**: The subgraph powers analytics dashboards (PAR30, repayment rates) for operations teams.
-- **Deployment lifecycle**: Foundry scripts handle Sepolia and Mainnet deployments; addresses feed into the frontend `.env` and subgraph manifest.
+- **Deployment lifecycle**: Foundry scripts target DIDLab; addresses feed into the frontend `.env` and subgraph manifest.
 
 For deployment procedures, see [`docs/runbook.md`](runbook.md). For parameter defaults and rationale, reference [`docs/params.md`](params.md) and the threat analysis in [`docs/threat-model.md`](threat-model.md).

@@ -28,7 +28,7 @@ After the installation is complete, run `foundryup` to install the latest versio
 
 ### 1.2. Clone the Repository
 
-Clone the Linea Microfinance repository to your local machine:
+Clone the DIDLab Microfinance repository to your local machine:
 
 ```bash
 git clone <your-repository-url>
@@ -67,9 +67,9 @@ The project uses a `.env` file to manage environment variables for RPC URLs, dep
     ```
 
 2.  Open the `.env` file and populate it with your own values. You will need:
-    *   An RPC URL for the Linea Sepolia testnet.
+    *   The DIDLab RPC URL (`https://eth.didlab.org`).
     *   A private key for the deployer account.
-    *   The address of a USDC stablecoin contract on Linea Sepolia.
+    *   The LabUSDT token address on DIDLab.
     *   An address for the governance owner.
 
 ## 2. Building and Testing the Smart Contracts
@@ -131,7 +131,7 @@ Deployment is handled by Foundry scripts. Before deploying, ensure your `.env` f
 Run the following script to deploy all the contracts and configure their initial roles:
 
 ```bash
-forge script script/00_deploy_all.s.sol --rpc-url $LINEA_SEPOLIA_RPC_URL --broadcast
+forge script script/00_deploy_all.s.sol --rpc-url $DIDLAB_RPC_URL --broadcast --legacy --with-gas-price 2gwei
 ```
 
 ### 4.2. Seed the Governance Parameters
@@ -139,7 +139,7 @@ forge script script/00_deploy_all.s.sol --rpc-url $LINEA_SEPOLIA_RPC_URL --broad
 After deployment, you need to seed the initial governance parameters:
 
 ```bash
-forge script script/01_seed_params.s.sol --rpc-url $LINEA_SEPOLIA_RPC_URL --broadcast
+forge script script/01_seed_params.s.sol --rpc-url $DIDLAB_RPC_URL --broadcast --legacy --with-gas-price 2gwei
 ```
 
 ### 4.3. Record the Addresses

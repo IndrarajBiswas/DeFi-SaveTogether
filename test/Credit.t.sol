@@ -8,9 +8,9 @@ import {GroupVault} from "../contracts/GroupVault.sol";
 import {SavingsPool} from "../contracts/SavingsPool.sol";
 import {CreditLine, IAttestationRegistry, ISavingsPool, IGroupVault, IGovernanceLite} from "../contracts/CreditLine.sol";
 
-contract MockUSDC is IERC20 {
-  string public constant name = "MockUSDC";
-  string public constant symbol = "mUSDC";
+contract MockLabUSDT is IERC20 {
+  string public constant name = "MockLabUSDT";
+  string public constant symbol = "mLABUSDT";
   uint8 public constant decimals = 6;
   mapping(address => uint256) public override balanceOf;
   mapping(address => mapping(address => uint256)) public override allowance;
@@ -22,7 +22,7 @@ contract MockUSDC is IERC20 {
 }
 
 contract CreditTest is Test {
-  MockUSDC usdc;
+  MockLabUSDT usdc;
   AttestationRegistry reg;
   GroupVault gv;
   SavingsPool sp;
@@ -32,7 +32,7 @@ contract CreditTest is Test {
   address borrower = address(0xB0);
 
   function setUp() public {
-    usdc = new MockUSDC();
+    usdc = new MockLabUSDT();
     reg = new AttestationRegistry(admin);
     vm.prank(admin);
     reg.setIssuer(admin, true);

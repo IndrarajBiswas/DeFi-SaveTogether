@@ -4,14 +4,14 @@ export default function Home() {
   return (
     <div className="grid">
       <section className="card">
-        <h1>Welcome to Linea Microfinance</h1>
+        <h1>Welcome to DIDLab Microfinance</h1>
         <p>
-          A Grameen-inspired group lending network deployed to Linea. This portal connects eligible
-          borrowers, group captains, and administrators to the on-chain savings and credit system.
+          A Grameen-inspired group lending network deployed on the DIDLab Trust testnet. This portal connects
+          eligible borrowers, group captains, and administrators to the on-chain savings and credit system.
         </p>
         <div className="notice">
-          <strong>Default network:</strong> Linea Sepolia (Chain ID 59141). Update environment variables to
-          target Linea Mainnet.
+          <strong>Network:</strong> DIDLab (Chain ID 252501) using LabUSDT (6 decimals) as the savings and loan
+          asset.
         </div>
       </section>
 

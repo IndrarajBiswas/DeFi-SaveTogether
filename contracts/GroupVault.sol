@@ -18,7 +18,7 @@ contract GroupVault is AccessControl, ReentrancyGuard {
   event GroupApproval(uint256 indexed gid, uint256 indexed loanId, address approver);
   event GroupSlashed(uint256 indexed gid, uint256 amount);
 
-  IERC20 public immutable asset; // USDC
+  IERC20 public immutable asset; // LabUSDT
 
   Group[] public groups; // gid = index
   mapping(uint256 => mapping(address => bool)) public isMember;

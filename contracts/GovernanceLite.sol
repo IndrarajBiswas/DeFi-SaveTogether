@@ -12,7 +12,7 @@ contract GovernanceLite is Ownable, Pausable {
   uint8 public minAttestationLevel = 1;
   uint16 public rateBpsPer4Weeks = 200; // 2%
   uint16 public platformFeeBps = 50; // 0.5%
-  uint256 public minPrincipal = 25e6; // USDC 6 decimals
+  uint256 public minPrincipal = 25e6; // LabUSDT (6 decimals)
   uint256 public maxPrincipal = 250e6;
   uint40[] public terms = [4, 8, 12];
   uint40 public graceDays = 7;

@@ -1,6 +1,6 @@
-# Linea Microfinance Documentation Hub
+# DIDLab Microfinance Documentation Hub
 
-Welcome! This hub is the canonical entry point for engineers, operators, and stakeholders working on the Linea Microfinance MVP. It provides deep dives, playbooks, and context that build on the high-level overview in the repository [README](../../README.md).
+Welcome! This hub is the canonical entry point for engineers, operators, and stakeholders working on the DIDLab Microfinance MVP. It provides deep dives, playbooks, and context that build on the high-level overview in the repository [README](../../README.md).
 
 ## How to Use This Hub
 
@@ -11,7 +11,7 @@ Welcome! This hub is the canonical entry point for engineers, operators, and sta
 
 ## System Overview
 
-Linea Microfinance combines on-chain contracts, an indexing layer, and a Next.js web application to deliver Grameen-style joint-liability lending on Linea Sepolia/Mainnet. A high-level diagram is available in [`docs/architecture.md`](../architecture.md), which covers:
+DIDLab Microfinance combines on-chain contracts, an indexing layer, and a Next.js web application to deliver Grameen-style joint-liability lending on the DIDLab Trust network. A high-level diagram is available in [`docs/architecture.md`](../architecture.md), which covers:
 
 - Contract responsibilities and key safeguards.
 - Data flow between the SavingsPool, GroupVault, and CreditLine contracts.
@@ -43,4 +43,4 @@ Additional resources:
 - **Frontend & Subgraph:** Manage the user experience, data visualizations, and API integrations.
 - **Operations:** Execute deployments, monitor health, and handle emergency procedures.
 
-Need help or have suggestions? Open an issue in GitHub or tag the relevant maintainer in the #linea-microfinance channel.
+Need help or have suggestions? Open an issue in GitHub or tag the relevant maintainer in the #didlab-microfinance channel.

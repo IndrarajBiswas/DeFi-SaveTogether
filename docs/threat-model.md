@@ -2,7 +2,7 @@
 
 ## Smart Contract Risks
 
-- **Token handling** – All USDC transfers use `SafeERC20`. Pull-based transfers prevent unexpected reentrancy.
+- **Token handling** – All LabUSDT transfers use `SafeERC20`. Pull-based transfers prevent unexpected reentrancy.
 - **Reentrancy** – `CreditLine`, `SavingsPool`, and `GroupVault` wrap state-changing methods with `ReentrancyGuard` and follow Checks-Effects-Interactions.
 - **Privilege misuse** – Only governance (multisig) can pause, update parameters, or seed issuers. Deployment scripts set ownership on deployment.
 - **Approval spoofing** – Each group member can approve a loan only once per request. Group size is capped to limit DoS.

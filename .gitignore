@@ -1,6 +1,7 @@
 out/
 cache/
-/lib/
+/lib/*
+!/lib/openzeppelin-contracts
 node_modules/
 dev-server.log
 .env

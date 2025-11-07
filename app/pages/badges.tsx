@@ -85,7 +85,7 @@ export default function BadgesPage() {
   })
 
   // Convert BigInt array to number array
-  const userBadges = userBadgesData ? userBadgesData.map((id) => Number(id)) : []
+  const userBadges = userBadgesData ? (userBadgesData as bigint[]).map((id) => Number(id)) : []
 
   const hasBadge = (badgeId: number) => userBadges.includes(badgeId)
 

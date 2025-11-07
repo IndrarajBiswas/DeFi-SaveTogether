@@ -2,10 +2,12 @@ import { useAccount, useReadContract, useBalance } from 'wagmi'
 import { useEffect, useState } from 'react'
 import { CONTRACTS, formatLabUSDT } from '../lib/contracts'
 import Link from 'next/link'
+import HelpDialog from '../components/HelpDialog'
 
 export default function Dashboard() {
   const { address, isConnected } = useAccount()
   const [hydrated, setHydrated] = useState(false)
+  const [showQuickActionsHelp, setShowQuickActionsHelp] = useState(false)
 
   useEffect(() => {
     setHydrated(true)
@@ -162,14 +164,19 @@ export default function Dashboard() {
       </section>
 
       {/* Quick Actions */}
-      <section className="card-dark">
-        <h2>Quick Actions</h2>
+      <section className="card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <h2 style={{ margin: 0 }}>Quick Actions</h2>
+          <button className="help-button" onClick={() => setShowQuickActionsHelp(true)}>
+            <span className="help-button-icon">?</span>
+            Help
+          </button>
+        </div>
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
             gap: '1rem',
-            marginTop: '1.5rem',
           }}
         >
           <Link href="/savings" className="button button-outline" style={{ width: '100%' }}>
@@ -188,6 +195,40 @@ export default function Dashboard() {
           ) : null}
         </div>
       </section>
+
+      {/* Quick Actions Help Dialog */}
+      <HelpDialog
+        isOpen={showQuickActionsHelp}
+        onClose={() => setShowQuickActionsHelp(false)}
+        title="Quick Actions Guide"
+        icon="🚀"
+      >
+        <div>
+          <h3>💰 Manage Savings</h3>
+          <p>
+            Visit the Savings page to deposit funds weekly, track your savings streak, and build your
+            financial reputation. A 5-week consecutive streak unlocks loan eligibility.
+          </p>
+
+          <h3>👥 My Groups</h3>
+          <p>
+            Create or join lending groups of 5-8 members. Groups provide peer accountability and are
+            required to access loans. Each member locks stake to share default risk.
+          </p>
+
+          <h3>🏦 Request Loan</h3>
+          <p>
+            Once you have a 5-week savings streak and are part of an active group, you can request
+            microfinance loans. Your group must approve the loan, and you repay weekly with 2% interest.
+          </p>
+
+          <h3>⚙️ Admin Panel</h3>
+          <p>
+            Available only to users with attestation level 2 or higher. Manage platform governance,
+            issue attestations, and configure system parameters.
+          </p>
+        </div>
+      </HelpDialog>
 
       {/* Key Features */}
       <section className="card">

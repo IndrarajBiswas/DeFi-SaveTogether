@@ -47,6 +47,7 @@ contract SavingsPool is ReentrancyGuard {
   function withdraw(uint256 amount) external nonReentrant {
     require(amount > 0 && amount <= balanceOf[msg.sender], "BALANCE");
     balanceOf[msg.sender] -= amount;
+    streak[msg.sender] = 0; // reset streak on withdrawal
     asset.safeTransfer(msg.sender, amount);
     emit Withdrawn(msg.sender, amount);
   }
@@ -55,10 +56,10 @@ contract SavingsPool is ReentrancyGuard {
     uint40 w = _currentWeek();
     uint40 lw = lastWeek[user];
     if (lw == 0) return 0;
-    // if current week passed without deposit, streak would reset off-chain; 
+    // if current week passed without deposit, streak would reset off-chain;
     // on-chain keeps last recorded streak; UI handles projection.
     if (w > lw + 1 && streak[user] > 0) {
-      return 1; // minimum fallback when gap detected
+      return 0; // return 0 when gap detected
     }
     return streak[user];
   }

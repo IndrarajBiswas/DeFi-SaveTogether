@@ -19,13 +19,27 @@ export default function GroupsPage() {
     functionName: 'groupCount',
   })
 
+  // Read allowance for lockStake
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
+    ...CONTRACTS.labUSDT,
+    functionName: 'allowance',
+    args: address ? [address, CONTRACTS.groupVault.address] : undefined,
+  })
+
   // Write functions
+  const { writeContract: approve, data: approveHash } = useWriteContract()
   const { writeContract: createGroup, data: createGroupHash } = useWriteContract()
   const { writeContract: lockStake, data: lockStakeHash } = useWriteContract()
 
   // Wait for transactions
+  const { isLoading: isApproving, isSuccess: approveSuccess } = useWaitForTransactionReceipt({ hash: approveHash })
   const { isLoading: isCreatingGroup, isSuccess: createGroupSuccess } = useWaitForTransactionReceipt({ hash: createGroupHash })
   const { isLoading: isLockingStake, isSuccess: lockStakeSuccess } = useWaitForTransactionReceipt({ hash: lockStakeHash })
+
+  // Refetch allowance after approval
+  if (approveSuccess) {
+    refetchAllowance()
+  }
 
   const handleChangeMember = (index: number, value: string) => {
     const newMembers = [...members]
@@ -65,7 +79,16 @@ export default function GroupsPage() {
     createGroup({
       ...CONTRACTS.groupVault,
       functionName: 'createGroup',
-      args: [validMembers as `0x${string}`[], BigInt(minApprovals)],
+      args: [validMembers as `0x${string}`[], minApprovals],
+    })
+  }
+
+  const handleApprove = () => {
+    setError(null)
+    approve({
+      ...CONTRACTS.labUSDT,
+      functionName: 'approve',
+      args: [CONTRACTS.groupVault.address, parseLabUSDT(10000)], // Approve 10k
     })
   }
 
@@ -85,6 +108,8 @@ export default function GroupsPage() {
       args: [BigInt(groupId), parseLabUSDT(amount)],
     })
   }
+
+  const needsApproval = !allowance || (allowance as bigint) < parseLabUSDT(parseFloat(stakeAmount) || 0)
 
   return (
     <div className="grid">
@@ -169,6 +194,23 @@ export default function GroupsPage() {
           Each member must lock 5% of max group exposure as stake.
         </p>
 
+        {needsApproval && isConnected && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <p style={{ marginBottom: '1rem', color: 'var(--gray-700)' }}>
+              First, you need to approve the GroupVault contract to spend your LabUSDT.
+            </p>
+            <button onClick={handleApprove} disabled={isApproving} className="button">
+              {isApproving ? (
+                <>
+                  <span className="spinner" /> Approving...
+                </>
+              ) : (
+                'Approve LabUSDT'
+              )}
+            </button>
+          </div>
+        )}
+
         <form className="form" onSubmit={handleLockStake}>
           <label>
             Group ID
@@ -191,7 +233,7 @@ export default function GroupsPage() {
               min="0"
             />
           </label>
-          <button type="submit" disabled={!isConnected || isLockingStake} className="button">
+          <button type="submit" disabled={!isConnected || needsApproval || isLockingStake} className="button">
             {isLockingStake ? (
               <>
                 <span className="spinner spinner-white" /> Locking Stake...

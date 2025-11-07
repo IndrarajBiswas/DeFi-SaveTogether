@@ -1,18 +1,62 @@
 import { FormEvent, useState } from 'react'
+import { isValidEthAddress, isPositiveInteger } from '../lib/validation'
 
 export default function AdminPage() {
   const [address, setAddress] = useState('0x')
   const [level, setLevel] = useState(1)
   const [paramKey, setParamKey] = useState('groupMaxExposure')
   const [paramValue, setParamValue] = useState('2000000000')
+  const [attestError, setAttestError] = useState<string | null>(null)
+  const [paramError, setParamError] = useState<string | null>(null)
 
   const handleAttest = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault()
+    setAttestError(null)
+
+    // Validate address
+    if (!isValidEthAddress(address)) {
+      setAttestError('Invalid Ethereum address')
+      return
+    }
+
+    // Validate level
+    if (level < 0 || level > 2) {
+      setAttestError('Level must be 0, 1, or 2')
+      return
+    }
+
     window.alert(`Mock attest ${address} at level ${level}`)
   }
 
   const handleParamUpdate = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault()
+    setParamError(null)
+
+    // Validate parameter value is a positive integer
+    if (!isPositiveInteger(paramValue)) {
+      setParamError('Parameter value must be a positive integer')
+      return
+    }
+
+    const numValue = parseInt(paramValue, 10)
+
+    // Additional validation based on parameter type
+    switch (paramKey) {
+      case 'rateBpsPer4Weeks':
+        if (numValue > 10000) {
+          setParamError('Rate cannot exceed 10000 bps (100%)')
+          return
+        }
+        break
+      case 'minPrincipal':
+      case 'maxPrincipal':
+        if (numValue === 0) {
+          setParamError('Principal must be greater than 0')
+          return
+        }
+        break
+    }
+
     window.alert(`Mock governance update ${paramKey} -> ${paramValue}`)
   }
 
@@ -28,6 +72,7 @@ export default function AdminPage() {
 
       <section className="card">
         <h2>Attest Pilot User</h2>
+        {attestError && <div style={{ color: 'red', marginBottom: '1rem' }}>{attestError}</div>}
         <form className="form" onSubmit={handleAttest}>
           <label>
             Address
@@ -47,6 +92,7 @@ export default function AdminPage() {
 
       <section className="card">
         <h2>Update Parameter</h2>
+        {paramError && <div style={{ color: 'red', marginBottom: '1rem' }}>{paramError}</div>}
         <form className="form" onSubmit={handleParamUpdate}>
           <label>
             Parameter

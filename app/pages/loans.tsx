@@ -1,7 +1,11 @@
 import { FormEvent, useMemo, useState } from 'react'
+import { isInRange, isMultipleOf } from '../lib/validation'
 
 const TERMS = [4, 8, 12]
 const RATE_BPS = 200
+const MIN_PRINCIPAL = 25
+const MAX_PRINCIPAL = 250
+const PRINCIPAL_STEP = 5
 
 function computeInstallment(principal: number, termWeeks: number, rateBps: number) {
   const blocks = Math.floor(termWeeks / 4)
@@ -13,10 +17,38 @@ function computeInstallment(principal: number, termWeeks: number, rateBps: numbe
 export default function LoansPage() {
   const [principal, setPrincipal] = useState(100)
   const [term, setTerm] = useState(8)
+  const [error, setError] = useState<string | null>(null)
   const weeklyPayment = useMemo(() => computeInstallment(principal, term, RATE_BPS), [principal, term])
+
+  const handlePrincipalChange = (value: string): void => {
+    const num = Number(value)
+    if (!isNaN(num)) {
+      setPrincipal(num)
+      if (error) setError(null)
+    }
+  }
 
   const handleRequestLoan = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault()
+    setError(null)
+
+    // Validate principal
+    if (!isInRange(principal, MIN_PRINCIPAL, MAX_PRINCIPAL)) {
+      setError(`Principal must be between ${MIN_PRINCIPAL} and ${MAX_PRINCIPAL} LabUSDT`)
+      return
+    }
+
+    if (!isMultipleOf(principal, PRINCIPAL_STEP)) {
+      setError(`Principal must be a multiple of ${PRINCIPAL_STEP} LabUSDT`)
+      return
+    }
+
+    // Validate term
+    if (!TERMS.includes(term)) {
+      setError(`Term must be one of ${TERMS.join(', ')} weeks`)
+      return
+    }
+
     window.alert(`Mock openLoan for ${principal} LabUSDT over ${term} weeks`)
   }
 
@@ -36,6 +68,7 @@ export default function LoansPage() {
 
       <section className="card">
         <h2>Request Loan</h2>
+        {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
         <form className="form" onSubmit={handleRequestLoan}>
           <label>
             Principal (LabUSDT)
@@ -45,7 +78,7 @@ export default function LoansPage() {
               max={250}
               step={5}
               value={principal}
-              onChange={(event) => setPrincipal(Number(event.target.value))}
+              onChange={(event) => handlePrincipalChange(event.target.value)}
             />
           </label>
           <label>

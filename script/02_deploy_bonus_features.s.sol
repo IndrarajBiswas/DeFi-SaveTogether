@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {Script} from "forge-std/Script.sol";
+import {console} from "forge-std/console.sol";
 import {AchievementBadges} from "../src/AchievementBadges.sol";
 import {SaveToken} from "../src/SaveToken.sol";
 import {GovernanceVoting} from "../src/GovernanceVoting.sol";

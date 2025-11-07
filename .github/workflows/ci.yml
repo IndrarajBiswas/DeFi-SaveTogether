@@ -10,7 +10,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: latest
+          version: nightly
       - name: Install deps
         run: |
           forge install OpenZeppelin/openzeppelin-contracts --no-commit

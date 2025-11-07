@@ -20,25 +20,47 @@ export default function LoansPage() {
   const { address, isConnected } = useAccount()
   const [principal, setPrincipal] = useState(100)
   const [term, setTerm] = useState(8)
+  const [groupId, setGroupId] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [repayAmount, setRepayAmount] = useState('')
   const [rescheduleWeeks, setRescheduleWeeks] = useState(4)
 
   const weeklyPayment = useMemo(() => computeInstallment(principal, term, RATE_BPS), [principal, term])
 
-  // Read user's active loan
-  const { data: loanData, refetch: refetchLoan } = useReadContract({
+  // Read borrower's loan ID first
+  const { data: borrowerLoanIdData, refetch: refetchLoanId } = useReadContract({
     ...CONTRACTS.creditLine,
-    functionName: 'loans',
+    functionName: 'borrowerLoanId',
     args: address ? [address] : undefined,
   })
 
+  const borrowerLoanId = borrowerLoanIdData ? BigInt(borrowerLoanIdData.toString()) : BigInt(0)
+
+  // Read user's active loan using the loan ID
+  const { data: loanData, refetch: refetchLoan } = useReadContract({
+    ...CONTRACTS.creditLine,
+    functionName: 'loans',
+    args: borrowerLoanId > BigInt(0) ? [borrowerLoanId] : undefined,
+  })
+
+  // Read allowance for repayment
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
+    ...CONTRACTS.labUSDT,
+    functionName: 'allowance',
+    args: address ? [address, CONTRACTS.creditLine.address] : undefined,
+  })
+
   // Contract writes
+  const { writeContract: approve, data: approveHash } = useWriteContract()
   const { writeContract: openLoan, data: openLoanHash } = useWriteContract()
   const { writeContract: repay, data: repayHash } = useWriteContract()
   const { writeContract: reschedule, data: rescheduleHash } = useWriteContract()
 
   // Transaction status
+  const { isLoading: isApproving, isSuccess: approveSuccess } = useWaitForTransactionReceipt({
+    hash: approveHash,
+  })
+
   const { isLoading: isOpeningLoan, isSuccess: loanOpened } = useWaitForTransactionReceipt({
     hash: openLoanHash,
   })
@@ -52,7 +74,11 @@ export default function LoansPage() {
   })
 
   // Auto-refresh after successful transactions
+  if (approveSuccess) {
+    refetchAllowance()
+  }
   if (loanOpened || repaySuccess || rescheduleSuccess) {
+    refetchLoanId()
     refetchLoan()
   }
 
@@ -64,12 +90,28 @@ export default function LoansPage() {
     }
   }
 
+  const handleApprove = () => {
+    setError(null)
+    approve({
+      ...CONTRACTS.labUSDT,
+      functionName: 'approve',
+      args: [CONTRACTS.creditLine.address, parseLabUSDT(10000)], // Approve 10k
+    })
+  }
+
   const handleRequestLoan = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault()
     setError(null)
 
     if (!isConnected || !address) {
       setError('Please connect your wallet')
+      return
+    }
+
+    // Validate group ID
+    const gid = Number(groupId)
+    if (isNaN(gid) || gid < 0) {
+      setError('Please enter a valid group ID')
       return
     }
 
@@ -90,17 +132,22 @@ export default function LoansPage() {
       return
     }
 
-    // Execute openLoan
+    // Execute openLoan with all 5 parameters: gid, borrower, principal, rateBps, termWeeks
     openLoan({
       ...CONTRACTS.creditLine,
       functionName: 'openLoan',
-      args: [parseLabUSDT(principal), BigInt(term)],
+      args: [BigInt(gid), address, parseLabUSDT(principal), BigInt(RATE_BPS), BigInt(term)],
     })
   }
 
   const handleRepay = () => {
     if (!isConnected || !address) {
       setError('Please connect your wallet')
+      return
+    }
+
+    if (borrowerLoanId <= BigInt(0)) {
+      setError('No active loan found')
       return
     }
 
@@ -113,7 +160,7 @@ export default function LoansPage() {
     repay({
       ...CONTRACTS.creditLine,
       functionName: 'repay',
-      args: [address, parseLabUSDT(amount)],
+      args: [borrowerLoanId, parseLabUSDT(amount)],
     })
   }
 
@@ -123,16 +170,22 @@ export default function LoansPage() {
       return
     }
 
+    if (borrowerLoanId <= BigInt(0)) {
+      setError('No active loan found')
+      return
+    }
+
     reschedule({
       ...CONTRACTS.creditLine,
       functionName: 'reschedule',
-      args: [address, BigInt(rescheduleWeeks)],
+      args: [borrowerLoanId, BigInt(rescheduleWeeks)],
     })
   }
 
   // Parse loan data if it exists
   const loan = loanData as any
   const hasActiveLoan = loan && loan.principal > BigInt(0)
+  const needsApproval = !allowance || (allowance as bigint) < parseLabUSDT(parseFloat(repayAmount) || 0)
 
   return (
     <div className="grid">
@@ -205,6 +258,18 @@ export default function LoansPage() {
 
           <form className="form" onSubmit={handleRequestLoan}>
             <label>
+              Group ID
+              <input
+                type="number"
+                min={0}
+                step={1}
+                value={groupId}
+                onChange={(event) => setGroupId(event.target.value)}
+                placeholder="Enter your group ID"
+                required
+              />
+            </label>
+            <label>
               Principal (LabUSDT)
               <input
                 type="number"
@@ -237,6 +302,18 @@ export default function LoansPage() {
         <>
           <section className="card">
             <h2>Make Repayment</h2>
+
+            {needsApproval && isConnected && repayAmount && parseFloat(repayAmount) > 0 && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <p style={{ marginBottom: '1rem', color: 'var(--gray-700)' }}>
+                  First, you need to approve the CreditLine contract to spend your LabUSDT for repayment.
+                </p>
+                <button onClick={handleApprove} disabled={isApproving} className="button">
+                  {isApproving ? 'Approving...' : 'Approve LabUSDT'}
+                </button>
+              </div>
+            )}
+
             {isRepaying && (
               <div className="notice" style={{ marginBottom: '1rem' }}>
                 Processing repayment... Check your wallet.
@@ -269,7 +346,7 @@ export default function LoansPage() {
                   placeholder="Enter repayment amount"
                 />
               </label>
-              <button onClick={handleRepay} disabled={isRepaying || !repayAmount}>
+              <button onClick={handleRepay} disabled={isRepaying || !repayAmount || needsApproval}>
                 {isRepaying ? 'Repaying...' : 'Repay Loan'}
               </button>
             </div>

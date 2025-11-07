@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 /**
  * @title SaveToken
@@ -36,11 +37,7 @@ contract SaveToken is ERC20, ERC20Votes, Ownable {
     event RewardDistributorUpdated(address indexed distributor, bool authorized);
     event RewardRatesUpdated(uint256 savings, uint256 loan, uint256 group);
 
-    constructor()
-        ERC20("SaveTogether", "SAVE")
-        ERC20Permit("SaveTogether")
-        Ownable(msg.sender)
-    {
+    constructor() ERC20("SaveTogether", "SAVE") EIP712("SaveTogether", "1") Ownable(msg.sender) {
         // Mint initial supply to deployer for distribution
         _mint(msg.sender, INITIAL_SUPPLY);
     }
@@ -93,13 +90,13 @@ contract SaveToken is ERC20, ERC20Votes, Ownable {
     /**
      * @notice Calculate savings reward for a user
      * @param savingsAmount Amount saved in LabUSDT (6 decimals)
-     * @param weeks Number of weeks saved
+     * @param numWeeks Number of weeks saved
      * @return Reward amount in SAVE tokens
      */
-    function calculateSavingsReward(uint256 savingsAmount, uint256 weeks) public view returns (uint256) {
+    function calculateSavingsReward(uint256 savingsAmount, uint256 numWeeks) public view returns (uint256) {
         // Convert LabUSDT (6 decimals) to thousands
         uint256 thousands = savingsAmount / 1000_000;
-        return (thousands * savingsRewardRate * weeks) / 1000;
+        return (thousands * savingsRewardRate * numWeeks) / 1000;
     }
 
     /**
@@ -165,9 +162,5 @@ contract SaveToken is ERC20, ERC20Votes, Ownable {
     // Required overrides for ERC20Votes
     function _update(address from, address to, uint256 value) internal override(ERC20, ERC20Votes) {
         super._update(from, to, value);
-    }
-
-    function nonces(address owner) public view override(ERC20Permit, Nonces) returns (uint256) {
-        return super.nonces(owner);
     }
 }

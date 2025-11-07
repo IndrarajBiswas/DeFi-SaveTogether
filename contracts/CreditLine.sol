@@ -63,6 +63,7 @@ contract CreditLine is AccessControl, Pausable, ReentrancyGuard {
 
   Loan[] public loans;
   mapping(address => bool) public hasActiveLoan; // MVP one active per borrower
+  mapping(address => uint256) public borrowerLoanId; // borrower => loanId (0 if no active loan)
   mapping(uint256 => uint256) public groupExposure; // gid => outstanding principal
 
   constructor(
@@ -121,6 +122,7 @@ contract CreditLine is AccessControl, Pausable, ReentrancyGuard {
       defaulted: false
     }));
     hasActiveLoan[borrower] = true;
+    borrowerLoanId[borrower] = loanId;
     groupExposure[gid] = newExposure;
 
     // disburse principal to borrower (pull LabUSDT from this contract's balance — funded via admin for MVP)
@@ -138,6 +140,7 @@ contract CreditLine is AccessControl, Pausable, ReentrancyGuard {
 
     if (L.repaid >= totalDue(loanId)) {
       hasActiveLoan[L.borrower] = false;
+      borrowerLoanId[L.borrower] = 0; // clear loan ID when fully repaid
       groupExposure[L.groupId] -= L.principal;
       // collect platform fee to treasury: principal * feeBps / 10000
       uint256 fee = (L.principal * gov.platformFeeBps()) / 10000;
@@ -168,6 +171,7 @@ contract CreditLine is AccessControl, Pausable, ReentrancyGuard {
 
     L.defaulted = true;
     hasActiveLoan[L.borrower] = false;
+    borrowerLoanId[L.borrower] = 0; // clear loan ID on default
     uint256 outstanding = due - L.repaid;
     // slash 5% of outstanding, bounded by stake (actual transfer managed in GroupVault)
     uint256 slashAmount = (outstanding * 500) / 10000;

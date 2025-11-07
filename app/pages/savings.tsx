@@ -1,12 +1,14 @@
 import { FormEvent, useState } from 'react'
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useBalance } from 'wagmi'
 import { CONTRACTS, parseLabUSDT, formatLabUSDT } from '../lib/contracts'
+import HelpDialog from '../components/HelpDialog'
 
 export default function SavingsPage() {
   const { address, isConnected } = useAccount()
   const [depositAmount, setDepositAmount] = useState('100')
   const [withdrawAmount, setWithdrawAmount] = useState('0')
   const [error, setError] = useState<string | null>(null)
+  const [showSavingsHelp, setShowSavingsHelp] = useState(false)
 
   // Read user's LabUSDT balance
   const { data: usdtBalance } = useBalance({
@@ -125,6 +127,14 @@ export default function SavingsPage() {
       <section className="card-hero">
         <h1>💰 Savings Pool</h1>
         <p>Build your savings streak to unlock loan eligibility. Deposit weekly to maintain your reputation.</p>
+        <button
+          className="help-button"
+          onClick={() => setShowSavingsHelp(true)}
+          style={{ marginTop: '1rem' }}
+        >
+          <span className="help-button-icon">?</span>
+          How Savings Work
+        </button>
       </section>
 
       {/* User Stats */}
@@ -291,30 +301,8 @@ export default function SavingsPage() {
         )}
       </section>
 
-      {/* How it Works */}
-      <section className="card-dark">
-        <h2>How Savings Work</h2>
-        <ul className="list" style={{ marginTop: '1rem' }}>
-          <li>
-            <strong>Deposit Weekly:</strong> Make deposits every week to build your savings streak
-          </li>
-          <li>
-            <strong>Build Reputation:</strong> A 5-week consecutive streak unlocks loan eligibility
-          </li>
-          <li>
-            <strong>Maintain Streak:</strong> Missing a week resets your streak back to zero
-          </li>
-          <li>
-            <strong>Withdrawing Resets:</strong> Any withdrawal will reset your streak counter
-          </li>
-          <li>
-            <strong>Earn Interest:</strong> Future: Earn yield on your savings balance
-          </li>
-        </ul>
-      </section>
-
       {/* FAQ */}
-      <section className="card">
+      <section className="card" style={{ gridColumn: '1 / -1' }}>
         <h2>Frequently Asked Questions</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1.5rem' }}>
           <div>
@@ -347,6 +335,47 @@ export default function SavingsPage() {
           </div>
         </div>
       </section>
+
+      {/* How Savings Work Help Dialog */}
+      <HelpDialog
+        isOpen={showSavingsHelp}
+        onClose={() => setShowSavingsHelp(false)}
+        title="How Savings Work"
+        icon="💰"
+      >
+        <div>
+          <h3>Deposit Weekly</h3>
+          <p>
+            Make deposits every week to build your savings streak. The amount can vary, but consistency
+            is key. Each deposit within a 7-day period counts toward your streak.
+          </p>
+
+          <h3>Build Reputation</h3>
+          <p>
+            A 5-week consecutive streak unlocks loan eligibility. This demonstrates financial discipline
+            and reduces default risk. Your streak is your reputation in the SaveTogether ecosystem.
+          </p>
+
+          <h3>Maintain Streak</h3>
+          <p>
+            Missing a week resets your streak back to zero. If you skip a week, you&apos;ll need to start over
+            and build back up to 5 consecutive weeks. Plan ahead to maintain your streak.
+          </p>
+
+          <h3>Withdrawing Resets</h3>
+          <p>
+            Any withdrawal will reset your streak counter to zero. This is an important safeguard in the
+            system. Only withdraw when absolutely necessary, as you&apos;ll lose your loan eligibility until you
+            rebuild your streak.
+          </p>
+
+          <h3>Earn Interest (Coming Soon)</h3>
+          <p>
+            In future updates, you&apos;ll earn yield on your savings balance. Your funds will work for you while
+            building your reputation, creating a win-win scenario for savers.
+          </p>
+        </div>
+      </HelpDialog>
     </div>
   )
 }

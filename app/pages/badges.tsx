@@ -1,5 +1,7 @@
 import { useAccount, useReadContract } from 'wagmi'
+import { useState } from 'react'
 import { CONTRACTS } from '../lib/contracts'
+import HelpDialog from '../components/HelpDialog'
 
 // Badge definitions matching smart contract
 const BADGE_INFO = [
@@ -70,6 +72,7 @@ const BADGE_INFO = [
 
 export default function BadgesPage() {
   const { address, isConnected } = useAccount()
+  const [showBadgesHelp, setShowBadgesHelp] = useState(false)
 
   // Read user's badges from contract (placeholder - contract not deployed yet)
   const userBadges = [1, 2, 5] // Mock data - replace with actual contract read
@@ -86,6 +89,14 @@ export default function BadgesPage() {
       <section className="card-hero">
         <h1>Achievement Badges</h1>
         <p>Earn NFT badges by reaching milestones on your savings journey</p>
+        <button
+          className="help-button"
+          onClick={() => setShowBadgesHelp(true)}
+          style={{ marginTop: '1rem' }}
+        >
+          <span className="help-button-icon">?</span>
+          How to Earn Badges
+        </button>
       </section>
 
       {isConnected ? (
@@ -222,41 +233,6 @@ export default function BadgesPage() {
             </div>
           </section>
 
-          {/* How to Earn Section */}
-          <section className="card-dark stagger-item" style={{ gridColumn: '1 / -1' }}>
-            <h2>How to Earn Badges</h2>
-            <div style={{ display: 'grid', gap: 'var(--space-4)', marginTop: 'var(--space-6)' }}>
-              <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'flex-start' }}>
-                <div style={{ fontSize: '2rem' }}>💰</div>
-                <div>
-                  <h4 style={{ color: 'var(--white)', marginBottom: 'var(--space-2)' }}>Savings Milestones</h4>
-                  <p style={{ margin: 0, color: 'var(--gray-400)' }}>
-                    Deposit regularly to earn First Deposit and maintain streaks for 5-Week and 10-Week Streak badges.
-                  </p>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'flex-start' }}>
-                <div style={{ fontSize: '2rem' }}>🏦</div>
-                <div>
-                  <h4 style={{ color: 'var(--white)', marginBottom: 'var(--space-2)' }}>Loan Activity</h4>
-                  <p style={{ margin: 0, color: 'var(--gray-400)' }}>
-                    Request your First Loan and repay on time to earn Loan Repaid and Credit Builder badges.
-                  </p>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'flex-start' }}>
-                <div style={{ fontSize: '2rem' }}>👥</div>
-                <div>
-                  <h4 style={{ color: 'var(--white)', marginBottom: 'var(--space-2)' }}>Community Engagement</h4>
-                  <p style={{ margin: 0, color: 'var(--gray-400)' }}>
-                    Create savings groups to earn Group Leader and join multiple groups for Community Pillar status.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
         </>
       ) : (
         <section className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 'var(--space-12)' }}>
@@ -267,6 +243,47 @@ export default function BadgesPage() {
           </p>
         </section>
       )}
+
+      {/* How to Earn Badges Help Dialog */}
+      <HelpDialog
+        isOpen={showBadgesHelp}
+        onClose={() => setShowBadgesHelp(false)}
+        title="How to Earn Badges"
+        icon="🎖️"
+      >
+        <div>
+          <h3>💰 Savings Milestones</h3>
+          <p>
+            Deposit regularly to earn savings-related badges. Your first deposit earns you the
+            <strong> First Deposit</strong> badge. Maintain streaks for 5 and 10 consecutive weeks to unlock
+            the <strong>5-Week Streak</strong> and <strong>10-Week Streak</strong> badges. Reach a total
+            savings balance of 1000 LabUSDT to earn the <strong>Savings Hero</strong> badge.
+          </p>
+
+          <h3>🏦 Loan Activity</h3>
+          <p>
+            Build your credit reputation through loan activity. Request your first loan to earn the
+            <strong> First Loan</strong> badge. Repay on time to unlock the <strong>Loan Repaid</strong> badge.
+            Successfully repay 3 or more loans to earn the prestigious <strong>Credit Builder</strong> badge,
+            demonstrating your commitment to financial responsibility.
+          </p>
+
+          <h3>👥 Community Engagement</h3>
+          <p>
+            Participate actively in the SaveTogether community. Create a savings group to earn the
+            <strong> Group Leader</strong> badge. Join and actively participate in 5 or more different groups
+            to earn the <strong>Community Pillar</strong> badge, recognizing your role in building the
+            community.
+          </p>
+
+          <h3>🔒 Soulbound NFTs</h3>
+          <p>
+            All badges are soulbound NFTs, meaning they cannot be transferred or sold. They permanently
+            represent your achievements and reputation within the SaveTogether ecosystem. Your badges are a
+            true reflection of your financial journey and commitment.
+          </p>
+        </div>
+      </HelpDialog>
     </div>
   )
 }

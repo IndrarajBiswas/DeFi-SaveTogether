@@ -869,6 +869,193 @@ input:disabled, select:disabled, textarea:disabled {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   Modal/Dialog Component
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-4);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: var(--white);
+  border: var(--border-width) solid var(--black);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: scaleIn 0.3s var(--bounce);
+  width: 100%;
+}
+
+.modal-sm { max-width: 400px; }
+.modal-md { max-width: 600px; }
+.modal-lg { max-width: 800px; }
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-6);
+  border-bottom: var(--border-width) solid var(--gray-200);
+  position: sticky;
+  top: 0;
+  background: var(--white);
+  z-index: 10;
+}
+
+.modal-title {
+  font-size: var(--text-2xl);
+  margin: 0;
+  color: var(--black);
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  font-size: var(--text-2xl);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  padding: 0;
+  box-shadow: none;
+  color: var(--gray-600);
+  flex-shrink: 0;
+}
+
+.modal-close:hover {
+  background: var(--gray-100);
+  color: var(--black);
+  transform: scale(1.1);
+}
+
+.modal-body {
+  padding: var(--space-6);
+}
+
+/* Help Dialog Specific Styles */
+.help-dialog {
+  min-height: 200px;
+}
+
+.help-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 2px solid var(--gray-200);
+}
+
+.help-dialog-icon {
+  font-size: var(--text-5xl);
+  line-height: 1;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.help-dialog-title {
+  font-size: var(--text-3xl);
+  margin: 0;
+  color: var(--black);
+}
+
+.help-dialog-content {
+  color: var(--gray-700);
+  line-height: 1.8;
+}
+
+.help-dialog-content h3 {
+  color: var(--black);
+  font-size: var(--text-xl);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-3);
+}
+
+.help-dialog-content h3:first-child {
+  margin-top: 0;
+}
+
+.help-dialog-content ul, .help-dialog-content ol {
+  margin: var(--space-4) 0;
+  padding-left: var(--space-8);
+}
+
+.help-dialog-content li {
+  margin-bottom: var(--space-3);
+  color: var(--gray-700);
+}
+
+.help-dialog-content strong {
+  color: var(--black);
+  font-weight: 800;
+}
+
+/* Help Button */
+.help-button {
+  background: var(--gray-100);
+  color: var(--black);
+  border: 2px solid var(--gray-300);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: var(--shadow-soft);
+}
+
+.help-button:hover {
+  background: var(--black);
+  color: var(--white);
+  border-color: var(--black);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.help-button-icon {
+  font-size: var(--text-lg);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    Print Styles
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -879,6 +1066,10 @@ input:disabled, select:disabled, textarea:disabled {
   }
 
   button, .button {
+    display: none;
+  }
+
+  .modal-overlay {
     display: none;
   }
 }

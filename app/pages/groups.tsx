@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react'
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { CONTRACTS, formatLabUSDT, parseLabUSDT } from '../lib/contracts'
 import { isValidEthAddress } from '../lib/validation'
+import HelpDialog from '../components/HelpDialog'
 
 export default function GroupsPage() {
   const { address, isConnected } = useAccount()
@@ -10,6 +11,7 @@ export default function GroupsPage() {
   const [stakeAmount, setStakeAmount] = useState('100')
   const [groupId, setGroupId] = useState('0')
   const [error, setError] = useState<string | null>(null)
+  const [showGroupsHelp, setShowGroupsHelp] = useState(false)
 
   // Read group count
   const { data: groupCount } = useReadContract({
@@ -89,6 +91,14 @@ export default function GroupsPage() {
       <section className="card-hero">
         <h1>👥 Group Management</h1>
         <p>Form lending groups of 5-8 members. Lock stake and approve loans for your peers.</p>
+        <button
+          className="help-button"
+          onClick={() => setShowGroupsHelp(true)}
+          style={{ marginTop: '1rem' }}
+        >
+          <span className="help-button-icon">?</span>
+          How Groups Work
+        </button>
       </section>
 
       <section className="card">
@@ -210,16 +220,50 @@ export default function GroupsPage() {
         )}
       </section>
 
-      <section className="card-dark">
-        <h2>How Groups Work</h2>
-        <ul className="list" style={{ marginTop: '1rem' }}>
-          <li><strong>5-8 Members:</strong> Groups must have between 5 and 8 members</li>
-          <li><strong>Majority Approval:</strong> Typically 3-of-5 or 5-of-8 approval needed</li>
-          <li><strong>Stake Required:</strong> Each member locks 5% of max exposure</li>
-          <li><strong>Peer Accountability:</strong> Group approves loans, shares default risk</li>
-          <li><strong>One Loan at a Time:</strong> Groups can only have one active loan</li>
-        </ul>
-      </section>
+      {/* How Groups Work Help Dialog */}
+      <HelpDialog
+        isOpen={showGroupsHelp}
+        onClose={() => setShowGroupsHelp(false)}
+        title="How Groups Work"
+        icon="👥"
+      >
+        <div>
+          <h3>5-8 Members</h3>
+          <p>
+            Groups must have between 5 and 8 members. This size range balances accountability with
+            manageable coordination. Smaller groups ensure everyone knows each other, while having enough
+            members spreads risk.
+          </p>
+
+          <h3>Majority Approval</h3>
+          <p>
+            Typically 3-of-5 or 5-of-8 approval is needed for group decisions, especially loan approvals.
+            This ensures that loans are vetted by multiple trusted members, reducing default risk through
+            peer accountability.
+          </p>
+
+          <h3>Stake Required</h3>
+          <p>
+            Each member locks 5% of max group exposure as stake. This creates skin in the game and aligns
+            incentives. If a group member defaults, the stake can be used to cover losses, protecting the
+            broader platform.
+          </p>
+
+          <h3>Peer Accountability</h3>
+          <p>
+            The group approves loans and shares default risk. Members are incentivized to only approve
+            loans for trustworthy peers they know will repay. This peer-based system replaces traditional
+            credit scores.
+          </p>
+
+          <h3>One Loan at a Time</h3>
+          <p>
+            Groups can only have one active loan at a time. This simplifies risk management and ensures
+            members focus on supporting the current borrower. Once a loan is repaid, the next member can
+            request a loan.
+          </p>
+        </div>
+      </HelpDialog>
     </div>
   )
 }

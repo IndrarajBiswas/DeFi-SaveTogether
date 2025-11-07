@@ -174,11 +174,11 @@ export default function Dashboard() {
           <Link href="/loans" className="button button-outline" style={{ width: '100%' }}>
             🏦 Request Loan
           </Link>
-          {address && attestationLevel && Number(attestationLevel) >= 2 && (
+          {address && attestationLevel && Number(attestationLevel) >= 2 ? (
             <Link href="/admin" className="button button-outline" style={{ width: '100%' }}>
               ⚙️ Admin Panel
             </Link>
-          )}
+          ) : null}
         </div>
       </section>
 

@@ -105,7 +105,7 @@ export default function SavingsPage() {
       return
     }
 
-    if (savingsBalance && parseLabUSDT(amount) > savingsBalance) {
+    if (savingsBalance && parseLabUSDT(amount) > (savingsBalance as bigint)) {
       setError('Insufficient savings balance')
       return
     }
@@ -154,19 +154,19 @@ export default function SavingsPage() {
             </div>
           </div>
 
-          {streak && Number(streak) >= 5 && (
+          {streak && Number(streak) >= 5 ? (
             <div className="alert alert-success" style={{ marginTop: '1.5rem' }}>
               ✅ <strong>Loan Eligible!</strong> You have {streak.toString()} weeks of savings streak. You can now
               request loans.
             </div>
-          )}
+          ) : null}
 
-          {streak && Number(streak) < 5 && Number(streak) > 0 && (
+          {streak && Number(streak) < 5 && Number(streak) > 0 ? (
             <div className="alert alert-info" style={{ marginTop: '1.5rem' }}>
               💪 Keep going! You need {5 - Number(streak)} more weeks of consecutive savings to unlock loan
               eligibility.
             </div>
-          )}
+          ) : null}
         </section>
       ) : (
         <section className="card">
@@ -260,7 +260,7 @@ export default function SavingsPage() {
           </label>
           <button
             type="submit"
-            disabled={!isConnected || isWithdrawing || !savingsBalance || savingsBalance === 0n}
+            disabled={!isConnected || isWithdrawing || !savingsBalance || savingsBalance === BigInt(0)}
             className="button button-outline"
           >
             {isWithdrawing ? (
@@ -320,14 +320,14 @@ export default function SavingsPage() {
           <div>
             <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>What is a savings streak?</h3>
             <p style={{ margin: 0, color: 'var(--gray-700)' }}>
-              Your savings streak is the number of consecutive weeks you've made deposits. It demonstrates financial
+              Your savings streak is the number of consecutive weeks you&apos;ve made deposits. It demonstrates financial
               discipline and is required to access loans.
             </p>
           </div>
           <div>
             <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>Why do I need 5 weeks?</h3>
             <p style={{ margin: 0, color: 'var(--gray-700)' }}>
-              The 5-week minimum streak requirement shows consistent savings behavior and reduces default risk. It's
+              The 5-week minimum streak requirement shows consistent savings behavior and reduces default risk. It&apos;s
               based on proven microfinance principles.
             </p>
           </div>
@@ -341,7 +341,7 @@ export default function SavingsPage() {
           <div>
             <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>What happens if I miss a week?</h3>
             <p style={{ margin: 0, color: 'var(--gray-700)' }}>
-              If you skip a week, your streak resets to 1 when you make your next deposit. You'll need to build back
+              If you skip a week, your streak resets to 1 when you make your next deposit. You&apos;ll need to build back
               up to 5 consecutive weeks.
             </p>
           </div>

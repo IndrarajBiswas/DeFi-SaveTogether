@@ -1,4 +1,6 @@
 import { FormEvent, useMemo, useState } from 'react'
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { CONTRACTS, formatLabUSDT, parseLabUSDT } from '../lib/contracts'
 import { isInRange, isMultipleOf } from '../lib/validation'
 
 const TERMS = [4, 8, 12]
@@ -15,10 +17,44 @@ function computeInstallment(principal: number, termWeeks: number, rateBps: numbe
 }
 
 export default function LoansPage() {
+  const { address, isConnected } = useAccount()
   const [principal, setPrincipal] = useState(100)
   const [term, setTerm] = useState(8)
   const [error, setError] = useState<string | null>(null)
+  const [repayAmount, setRepayAmount] = useState('')
+  const [rescheduleWeeks, setRescheduleWeeks] = useState(4)
+
   const weeklyPayment = useMemo(() => computeInstallment(principal, term, RATE_BPS), [principal, term])
+
+  // Read user's active loan
+  const { data: loanData, refetch: refetchLoan } = useReadContract({
+    ...CONTRACTS.creditLine,
+    functionName: 'loans',
+    args: address ? [address] : undefined,
+  })
+
+  // Contract writes
+  const { writeContract: openLoan, data: openLoanHash } = useWriteContract()
+  const { writeContract: repay, data: repayHash } = useWriteContract()
+  const { writeContract: reschedule, data: rescheduleHash } = useWriteContract()
+
+  // Transaction status
+  const { isLoading: isOpeningLoan, isSuccess: loanOpened } = useWaitForTransactionReceipt({
+    hash: openLoanHash,
+  })
+
+  const { isLoading: isRepaying, isSuccess: repaySuccess } = useWaitForTransactionReceipt({
+    hash: repayHash,
+  })
+
+  const { isLoading: isRescheduling, isSuccess: rescheduleSuccess } = useWaitForTransactionReceipt({
+    hash: rescheduleHash,
+  })
+
+  // Auto-refresh after successful transactions
+  if (loanOpened || repaySuccess || rescheduleSuccess) {
+    refetchLoan()
+  }
 
   const handlePrincipalChange = (value: string): void => {
     const num = Number(value)
@@ -31,6 +67,11 @@ export default function LoansPage() {
   const handleRequestLoan = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault()
     setError(null)
+
+    if (!isConnected || !address) {
+      setError('Please connect your wallet')
+      return
+    }
 
     // Validate principal
     if (!isInRange(principal, MIN_PRINCIPAL, MAX_PRINCIPAL)) {
@@ -49,8 +90,49 @@ export default function LoansPage() {
       return
     }
 
-    window.alert(`Mock openLoan for ${principal} LabUSDT over ${term} weeks`)
+    // Execute openLoan
+    openLoan({
+      ...CONTRACTS.creditLine,
+      functionName: 'openLoan',
+      args: [parseLabUSDT(principal), BigInt(term)],
+    })
   }
+
+  const handleRepay = () => {
+    if (!isConnected || !address) {
+      setError('Please connect your wallet')
+      return
+    }
+
+    const amount = Number(repayAmount)
+    if (isNaN(amount) || amount <= 0) {
+      setError('Please enter a valid repayment amount')
+      return
+    }
+
+    repay({
+      ...CONTRACTS.creditLine,
+      functionName: 'repay',
+      args: [address, parseLabUSDT(amount)],
+    })
+  }
+
+  const handleReschedule = () => {
+    if (!isConnected || !address) {
+      setError('Please connect your wallet')
+      return
+    }
+
+    reschedule({
+      ...CONTRACTS.creditLine,
+      functionName: 'reschedule',
+      args: [address, BigInt(rescheduleWeeks)],
+    })
+  }
+
+  // Parse loan data if it exists
+  const loan = loanData as any
+  const hasActiveLoan = loan && loan.principal > BigInt(0)
 
   return (
     <div className="grid">
@@ -66,35 +148,174 @@ export default function LoansPage() {
         </div>
       </section>
 
-      <section className="card">
-        <h2>Request Loan</h2>
-        {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
-        <form className="form" onSubmit={handleRequestLoan}>
-          <label>
-            Principal (LabUSDT)
-            <input
-              type="number"
-              min={25}
-              max={250}
-              step={5}
-              value={principal}
-              onChange={(event) => handlePrincipalChange(event.target.value)}
-            />
-          </label>
-          <label>
-            Term (weeks)
-            <select value={term} onChange={(event) => setTerm(Number(event.target.value))}>
-              {TERMS.map((value) => (
-                <option key={value} value={value}>
-                  {value} weeks
-                </option>
-              ))}
-            </select>
-          </label>
-          <button type="submit">Simulate openLoan()</button>
-        </form>
-        <p className="tag">Estimated weekly payment: {weeklyPayment.toFixed(2)} LabUSDT</p>
-      </section>
+      {!isConnected && (
+        <section className="card">
+          <p style={{ color: 'var(--gray-300)' }}>Connect your wallet to request loans</p>
+        </section>
+      )}
+
+      {isConnected && hasActiveLoan && (
+        <section className="card-hero">
+          <h2>Your Active Loan</h2>
+          <div className="stats-grid" style={{ marginTop: '1.5rem' }}>
+            <div className="stat-card">
+              <div className="stat-value">{formatLabUSDT(loan.principal)}</div>
+              <div className="stat-label">Principal</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{formatLabUSDT(loan.repaid)}</div>
+              <div className="stat-label">Repaid</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{loan.termWeeks?.toString() || '0'}</div>
+              <div className="stat-label">Term (weeks)</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{loan.openedAt ? new Date(Number(loan.openedAt) * 1000).toLocaleDateString() : 'N/A'}</div>
+              <div className="stat-label">Opened</div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {isConnected && !hasActiveLoan && (
+        <section className="card">
+          <h2>Request Loan</h2>
+          {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
+
+          {isOpeningLoan && (
+            <div className="notice" style={{ marginBottom: '1rem' }}>
+              Opening loan... Check your wallet for transaction confirmation.
+            </div>
+          )}
+
+          {loanOpened && openLoanHash && (
+            <div className="notice" style={{ marginBottom: '1rem', background: '#d4edda' }}>
+              Loan opened successfully!{' '}
+              <a
+                href={`https://explorer.didlab.org/tx/${openLoanHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'underline' }}
+              >
+                View transaction
+              </a>
+            </div>
+          )}
+
+          <form className="form" onSubmit={handleRequestLoan}>
+            <label>
+              Principal (LabUSDT)
+              <input
+                type="number"
+                min={25}
+                max={250}
+                step={5}
+                value={principal}
+                onChange={(event) => handlePrincipalChange(event.target.value)}
+              />
+            </label>
+            <label>
+              Term (weeks)
+              <select value={term} onChange={(event) => setTerm(Number(event.target.value))}>
+                {TERMS.map((value) => (
+                  <option key={value} value={value}>
+                    {value} weeks
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button type="submit" disabled={isOpeningLoan}>
+              {isOpeningLoan ? 'Opening Loan...' : 'Request Loan'}
+            </button>
+          </form>
+          <p className="tag">Estimated weekly payment: {weeklyPayment.toFixed(2)} LabUSDT</p>
+        </section>
+      )}
+
+      {isConnected && hasActiveLoan && (
+        <>
+          <section className="card">
+            <h2>Make Repayment</h2>
+            {isRepaying && (
+              <div className="notice" style={{ marginBottom: '1rem' }}>
+                Processing repayment... Check your wallet.
+              </div>
+            )}
+
+            {repaySuccess && repayHash && (
+              <div className="notice" style={{ marginBottom: '1rem', background: '#d4edda' }}>
+                Repayment successful!{' '}
+                <a
+                  href={`https://explorer.didlab.org/tx/${repayHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ textDecoration: 'underline' }}
+                >
+                  View transaction
+                </a>
+              </div>
+            )}
+
+            <div className="form">
+              <label>
+                Amount (LabUSDT)
+                <input
+                  type="number"
+                  min={0.01}
+                  step={0.01}
+                  value={repayAmount}
+                  onChange={(e) => setRepayAmount(e.target.value)}
+                  placeholder="Enter repayment amount"
+                />
+              </label>
+              <button onClick={handleRepay} disabled={isRepaying || !repayAmount}>
+                {isRepaying ? 'Repaying...' : 'Repay Loan'}
+              </button>
+            </div>
+          </section>
+
+          <section className="card">
+            <h2>Reschedule Loan</h2>
+            <p style={{ color: 'var(--gray-700)', marginBottom: '1rem' }}>
+              Extend your loan term. Fee: 0.5% of principal. Can only reschedule once.
+            </p>
+
+            {isRescheduling && (
+              <div className="notice" style={{ marginBottom: '1rem' }}>
+                Rescheduling... Check your wallet.
+              </div>
+            )}
+
+            {rescheduleSuccess && rescheduleHash && (
+              <div className="notice" style={{ marginBottom: '1rem', background: '#d4edda' }}>
+                Loan rescheduled!{' '}
+                <a
+                  href={`https://explorer.didlab.org/tx/${rescheduleHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ textDecoration: 'underline' }}
+                >
+                  View transaction
+                </a>
+              </div>
+            )}
+
+            <div className="form">
+              <label>
+                Extra weeks
+                <select value={rescheduleWeeks} onChange={(e) => setRescheduleWeeks(Number(e.target.value))}>
+                  <option value={4}>4 weeks</option>
+                  <option value={8}>8 weeks</option>
+                </select>
+              </label>
+              <button onClick={handleReschedule} disabled={isRescheduling}>
+                {isRescheduling ? 'Rescheduling...' : 'Reschedule Loan'}
+              </button>
+            </div>
+          </section>
+        </>
+      )}
 
       <section className="card">
         <h2>Approval Process</h2>
@@ -106,12 +327,12 @@ export default function LoansPage() {
       </section>
 
       <section className="card">
-        <h2>Repayment & Reschedule</h2>
+        <h2>Loan Mechanics</h2>
         <ul className="list">
           <li>Use <code>CreditLine.dueAt(loanId, week)</code> to fetch expected installment.</li>
-          <li>`repay(loanId, amount)` accepts partial amounts; totals tracked in `Loan.repaid`.</li>
-          <li>`reschedule(loanId, extraWeeks)` allowed once; fee = 0.5% of principal.</li>
-          <li>Failure to repay within grace triggers `markDefault` and stake slashing.</li>
+          <li><code>repay(loanId, amount)</code> accepts partial amounts; totals tracked in <code>Loan.repaid</code>.</li>
+          <li><code>reschedule(loanId, extraWeeks)</code> allowed once; fee = 0.5% of principal.</li>
+          <li>Failure to repay within grace triggers <code>markDefault</code> and stake slashing.</li>
         </ul>
       </section>
     </div>

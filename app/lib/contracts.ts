@@ -102,6 +102,42 @@ export const CONTRACTS = {
       'function sweep(address payable to) external',
     ],
   },
+
+  achievementBadges: {
+    address: (process.env.NEXT_PUBLIC_CONTRACT_ACHIEVEMENT_BADGES || '0x0000000000000000000000000000000000000000') as `0x${string}`,
+    abi: [
+      // View functions
+      'function getUserBadges(address user) view returns (uint256[])',
+      'function getBadgeInfo(uint256 badgeId) view returns (string name, string description)',
+      'function hasBadge(address user, uint256 badgeId) view returns (bool)',
+      'function badgeNames(uint256 badgeId) view returns (string)',
+      'function badgeDescriptions(uint256 badgeId) view returns (string)',
+      'function balanceOf(address account, uint256 id) view returns (uint256)',
+      'function uri(uint256 badgeId) view returns (string)',
+
+      // Badge ID constants
+      'function FIRST_DEPOSIT() view returns (uint256)',
+      'function FIVE_WEEK_STREAK() view returns (uint256)',
+      'function TEN_WEEK_STREAK() view returns (uint256)',
+      'function FIRST_LOAN() view returns (uint256)',
+      'function LOAN_REPAID() view returns (uint256)',
+      'function GROUP_LEADER() view returns (uint256)',
+      'function SAVINGS_HERO() view returns (uint256)',
+      'function CREDIT_BUILDER() view returns (uint256)',
+      'function COMMUNITY_PILLAR() view returns (uint256)',
+
+      // Admin functions
+      'function awardBadge(address user, uint256 badgeId) external',
+      'function awardBadges(address user, uint256[] calldata badgeIds) external',
+      'function setAuthorizedMinter(address minter, bool authorized) external',
+      'function setBadgeMetadata(uint256 badgeId, string calldata name, string calldata description) external',
+
+      // Events
+      'event BadgeAwarded(address indexed user, uint256 indexed badgeId, string badgeName)',
+      'event MinterAuthorized(address indexed minter, bool authorized)',
+      'event BadgeMetadataUpdated(uint256 indexed badgeId, string name, string description)',
+    ],
+  },
 } as const
 
 // Helper: Get all contract addresses for easy reference
@@ -113,6 +149,7 @@ export const CONTRACT_ADDRESSES = {
   attestationRegistry: CONTRACTS.attestationRegistry.address,
   governanceLite: CONTRACTS.governanceLite.address,
   treasury: CONTRACTS.treasury.address,
+  achievementBadges: CONTRACTS.achievementBadges.address,
 } as const
 
 // Constants from contracts

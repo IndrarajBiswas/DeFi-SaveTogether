@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: '/groups', label: 'Groups', icon: '👥' },
   { href: '/loans', label: 'Loans', icon: '🏦' },
   { href: '/badges', label: 'Badges', icon: '🏆' },
+  { href: '/badge-explorer', label: 'Explorer', icon: '🔍' },
   { href: '/governance', label: 'Governance', icon: '🗳️' },
   { href: '/admin', label: 'Admin', icon: '⚙️' }
 ]

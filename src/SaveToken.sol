@@ -93,13 +93,13 @@ contract SaveToken is ERC20, ERC20Votes, Ownable {
     /**
      * @notice Calculate savings reward for a user
      * @param savingsAmount Amount saved in LabUSDT (6 decimals)
-     * @param weeks Number of weeks saved
+     * @param numWeeks Number of weeks saved
      * @return Reward amount in SAVE tokens
      */
-    function calculateSavingsReward(uint256 savingsAmount, uint256 weeks) public view returns (uint256) {
+    function calculateSavingsReward(uint256 savingsAmount, uint256 numWeeks) public view returns (uint256) {
         // Convert LabUSDT (6 decimals) to thousands
         uint256 thousands = savingsAmount / 1000_000;
-        return (thousands * savingsRewardRate * weeks) / 1000;
+        return (thousands * savingsRewardRate * numWeeks) / 1000;
     }
 
     /**

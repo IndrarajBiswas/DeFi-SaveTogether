@@ -1,7 +1,7 @@
 import { useAccount, useReadContract } from 'wagmi'
 import { useState } from 'react'
 import { CONTRACTS } from '../lib/contracts'
-import HelpDialog from '../components/HelpDialog'
+import { isAddress } from 'viem'
 
 // Badge definitions matching smart contract
 const BADGE_INFO = [
@@ -70,17 +70,19 @@ const BADGE_INFO = [
   },
 ]
 
-export default function BadgesPage() {
-  const { address, isConnected } = useAccount()
-  const [showBadgesHelp, setShowBadgesHelp] = useState(false)
+export default function BadgeExplorerPage() {
+  const { address: connectedAddress, isConnected } = useAccount()
+  const [searchAddress, setSearchAddress] = useState('')
+  const [viewAddress, setViewAddress] = useState<`0x${string}` | null>(null)
+  const [error, setError] = useState('')
 
-  // Read user's badges from contract
-  const { data: userBadgesData } = useReadContract({
+  // Read badges for the viewed address
+  const { data: userBadgesData, isLoading } = useReadContract({
     ...CONTRACTS.achievementBadges,
     functionName: 'getUserBadges',
-    args: address ? [address] : undefined,
+    args: viewAddress ? [viewAddress] : undefined,
     query: {
-      enabled: !!address && isConnected,
+      enabled: !!viewAddress,
     },
   })
 
@@ -91,29 +93,128 @@ export default function BadgesPage() {
 
   const earnedCount = userBadges.length
   const totalCount = BADGE_INFO.length
-  const completionPercent = Math.round((earnedCount / totalCount) * 100)
+  const completionPercent = totalCount > 0 ? Math.round((earnedCount / totalCount) * 100) : 0
+
+  const handleSearch = () => {
+    setError('')
+
+    if (!searchAddress) {
+      setError('Please enter an address')
+      return
+    }
+
+    if (!isAddress(searchAddress)) {
+      setError('Invalid Ethereum address')
+      return
+    }
+
+    setViewAddress(searchAddress as `0x${string}`)
+  }
+
+  const handleViewMyBadges = () => {
+    if (connectedAddress) {
+      setSearchAddress(connectedAddress)
+      setViewAddress(connectedAddress)
+      setError('')
+    }
+  }
+
+  const shortenAddress = (addr: string) => {
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`
+  }
 
   return (
     <div className="grid">
       {/* Hero Section */}
       <section className="card-hero">
-        <h1>Achievement Badges</h1>
-        <p>Earn NFT badges by reaching milestones on your savings journey</p>
-        <button
-          className="help-button"
-          onClick={() => setShowBadgesHelp(true)}
-          style={{ marginTop: '1rem' }}
-        >
-          <span className="help-button-icon">?</span>
-          How to Earn Badges
-        </button>
+        <h1>🔍 Badge Explorer</h1>
+        <p>Search and view achievement badges for any SaveTogether user</p>
       </section>
 
-      {isConnected ? (
+      {/* Search Section */}
+      <section className="card stagger-item" style={{ gridColumn: '1 / -1' }}>
+        <h2>Search for User Badges</h2>
+        <p style={{ color: 'var(--gray-600)', marginBottom: '1.5rem' }}>
+          Enter any Ethereum address to view their earned achievement badges
+        </p>
+
+        <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: '1rem' }}>
+          <input
+            type="text"
+            value={searchAddress}
+            onChange={(e) => setSearchAddress(e.target.value)}
+            placeholder="0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+            className="input"
+            style={{
+              flex: 1,
+              padding: 'var(--space-3)',
+              border: '1px solid var(--gray-300)',
+              borderRadius: 'var(--radius-md)',
+              fontSize: 'var(--text-base)',
+            }}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+          />
+          <button onClick={handleSearch} className="button-primary" style={{ whiteSpace: 'nowrap' }}>
+            🔍 Search
+          </button>
+          {isConnected && (
+            <button onClick={handleViewMyBadges} className="button-secondary" style={{ whiteSpace: 'nowrap' }}>
+              View My Badges
+            </button>
+          )}
+        </div>
+
+        {error && (
+          <div
+            style={{
+              padding: 'var(--space-3)',
+              background: '#FEE2E2',
+              color: '#991B1B',
+              borderRadius: 'var(--radius-md)',
+              fontSize: 'var(--text-sm)',
+            }}
+          >
+            {error}
+          </div>
+        )}
+      </section>
+
+      {/* Results Section */}
+      {viewAddress && (
         <>
+          {/* User Info */}
+          <section className="card stagger-item" style={{ gridColumn: '1 / -1' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+              <div
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, var(--black) 0%, var(--gray-700) 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '2rem',
+                }}
+              >
+                👤
+              </div>
+              <div style={{ flex: 1 }}>
+                <h2 style={{ marginBottom: 'var(--space-1)' }}>
+                  {connectedAddress?.toLowerCase() === viewAddress.toLowerCase()
+                    ? 'Your Badges'
+                    : `User ${shortenAddress(viewAddress)}`}
+                </h2>
+                <p style={{ color: 'var(--gray-600)', fontSize: 'var(--text-sm)', marginBottom: 0 }}>
+                  {viewAddress}
+                </p>
+              </div>
+            </div>
+          </section>
+
           {/* Progress Overview */}
           <section className="card stagger-item">
-            <h2>Your Progress</h2>
+            <h2>Badge Progress</h2>
             <div style={{ marginTop: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                 <span style={{ fontWeight: 700 }}>
@@ -146,7 +247,9 @@ export default function BadgesPage() {
           <section className="card stagger-item" style={{ gridColumn: '1 / -1' }}>
             <h2>Badge Collection</h2>
             <p style={{ color: 'var(--gray-600)', marginBottom: '2rem' }}>
-              Unlock achievements by participating in the platform. All badges are soulbound NFTs (non-transferable).
+              {isLoading
+                ? 'Loading badges...'
+                : `This user has earned ${earnedCount} out of ${totalCount} available badges`}
             </p>
 
             <div
@@ -234,7 +337,7 @@ export default function BadgesPage() {
                           color: 'var(--gray-700)',
                         }}
                       >
-                        🔒 Locked
+                        🔒 Not Earned
                       </div>
                     )}
                   </div>
@@ -242,58 +345,23 @@ export default function BadgesPage() {
               })}
             </div>
           </section>
-
         </>
-      ) : (
-        <section className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 'var(--space-12)' }}>
-          <div style={{ fontSize: '4rem', marginBottom: 'var(--space-4)' }}>🎖️</div>
-          <h2>Connect Your Wallet</h2>
+      )}
+
+      {/* No Address Selected */}
+      {!viewAddress && (
+        <section
+          className="card stagger-item"
+          style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 'var(--space-12)' }}
+        >
+          <div style={{ fontSize: '5rem', marginBottom: 'var(--space-4)' }}>🔍</div>
+          <h2>Search to Get Started</h2>
           <p style={{ color: 'var(--gray-600)', maxWidth: '500px', margin: '0 auto' }}>
-            Connect your wallet to view your achievement badges and track your progress through the platform milestones.
+            Enter an Ethereum address above to explore their achievement badges and see their progress in the
+            SaveTogether platform.
           </p>
         </section>
       )}
-
-      {/* How to Earn Badges Help Dialog */}
-      <HelpDialog
-        isOpen={showBadgesHelp}
-        onClose={() => setShowBadgesHelp(false)}
-        title="How to Earn Badges"
-        icon="🎖️"
-      >
-        <div>
-          <h3>💰 Savings Milestones</h3>
-          <p>
-            Deposit regularly to earn savings-related badges. Your first deposit earns you the
-            <strong> First Deposit</strong> badge. Maintain streaks for 5 and 10 consecutive weeks to unlock
-            the <strong>5-Week Streak</strong> and <strong>10-Week Streak</strong> badges. Reach a total
-            savings balance of 1000 LabUSDT to earn the <strong>Savings Hero</strong> badge.
-          </p>
-
-          <h3>🏦 Loan Activity</h3>
-          <p>
-            Build your credit reputation through loan activity. Request your first loan to earn the
-            <strong> First Loan</strong> badge. Repay on time to unlock the <strong>Loan Repaid</strong> badge.
-            Successfully repay 3 or more loans to earn the prestigious <strong>Credit Builder</strong> badge,
-            demonstrating your commitment to financial responsibility.
-          </p>
-
-          <h3>👥 Community Engagement</h3>
-          <p>
-            Participate actively in the SaveTogether community. Create a savings group to earn the
-            <strong> Group Leader</strong> badge. Join and actively participate in 5 or more different groups
-            to earn the <strong>Community Pillar</strong> badge, recognizing your role in building the
-            community.
-          </p>
-
-          <h3>🔒 Soulbound NFTs</h3>
-          <p>
-            All badges are soulbound NFTs, meaning they cannot be transferred or sold. They permanently
-            represent your achievements and reputation within the SaveTogether ecosystem. Your badges are a
-            true reflection of your financial journey and commitment.
-          </p>
-        </div>
-      </HelpDialog>
     </div>
   )
 }

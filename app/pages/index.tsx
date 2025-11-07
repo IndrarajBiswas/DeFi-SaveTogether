@@ -1,9 +1,15 @@
 import { useAccount, useReadContract, useBalance } from 'wagmi'
+import { useEffect, useState } from 'react'
 import { CONTRACTS, formatLabUSDT } from '../lib/contracts'
 import Link from 'next/link'
 
 export default function Dashboard() {
   const { address, isConnected } = useAccount()
+  const [hydrated, setHydrated] = useState(false)
+
+  useEffect(() => {
+    setHydrated(true)
+  }, [])
 
   // Read user's LabUSDT balance
   const { data: usdtBalance } = useBalance({
@@ -61,14 +67,9 @@ export default function Dashboard() {
         <p>
           Blockchain-powered microfinance for the unbanked. Build savings, form groups, access credit.
         </p>
-        {!isConnected && (
-          <div style={{ marginTop: '2rem' }}>
-            <p style={{ color: 'var(--gray-300)', marginBottom: '1rem' }}>
-              Connect your wallet to get started
-            </p>
-          </div>
-        )}
-        {isConnected && (
+        {!hydrated ? (
+          <div style={{ marginTop: '2rem', color: 'var(--gray-300)' }}>Loading wallet state…</div>
+        ) : isConnected ? (
           <div className="stats-grid" style={{ marginTop: '2rem' }}>
             <div className="stat-card">
               <div className="stat-value">
@@ -90,6 +91,12 @@ export default function Dashboard() {
               <div className="stat-value">{attestationLevel?.toString() || '0'}</div>
               <div className="stat-label">Attestation Level</div>
             </div>
+          </div>
+        ) : (
+          <div style={{ marginTop: '2rem' }}>
+            <p style={{ color: 'var(--gray-300)', marginBottom: '1rem' }}>
+              Connect your wallet to get started
+            </p>
           </div>
         )}
       </section>

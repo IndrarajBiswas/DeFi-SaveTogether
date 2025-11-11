@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import dynamic from 'next/dynamic'
 
 const WalletControls = dynamic(() => import('./WalletControls'), { ssr: false })
+const DarkModeToggle = dynamic(() => import('./DarkModeToggle'), { ssr: false })
 
 const NAV_ITEMS = [
   { href: '/', label: 'Dashboard', icon: '📊' },
@@ -18,18 +19,24 @@ const NAV_ITEMS = [
 
 export default function Layout({ children }: { children: ReactNode }) {
   const router = useRouter()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Skip to main content link for accessibility */}
+      <a href="#main-content" className="skip-to-main">
+        Skip to main content
+      </a>
+
       {/* Header */}
       <header
         style={{
-          borderBottom: '2px solid black',
-          background: 'white',
+          borderBottom: '2px solid var(--color-border)',
+          background: 'var(--color-card)',
           position: 'sticky',
           top: 0,
           zIndex: 100,
-          boxShadow: '0 4px 0 black'
+          boxShadow: '0 4px 0 var(--color-border)'
         }}
       >
         <div
@@ -58,7 +65,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 fontSize: '1.75rem',
                 fontWeight: 800,
                 margin: 0,
-                color: 'black',
+                color: 'var(--color-text)',
                 letterSpacing: '-0.02em',
                 textTransform: 'uppercase'
               }}
@@ -69,7 +76,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               style={{
                 fontSize: '0.75rem',
                 margin: 0,
-                color: '#737373',
+                color: 'var(--gray-500)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em',
                 fontWeight: 700
@@ -82,15 +89,31 @@ export default function Layout({ children }: { children: ReactNode }) {
           {/* Spacer */}
           <div style={{ flex: 1 }} />
 
+          {/* Dark Mode Toggle */}
+          <DarkModeToggle />
+
           {/* Wallet */}
           <WalletControls />
+
+          {/* Mobile Menu Button */}
+          <button
+            className={`mobile-menu-button ${mobileMenuOpen ? 'active' : ''}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle mobile menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
 
-        {/* Navigation */}
+        {/* Desktop Navigation */}
         <nav
+          className="desktop-nav"
           style={{
-            borderTop: '2px solid black',
-            background: 'black',
+            borderTop: '2px solid var(--color-border)',
+            background: 'var(--black)',
             overflowX: 'auto'
           }}
         >
@@ -142,19 +165,49 @@ export default function Layout({ children }: { children: ReactNode }) {
             })}
           </div>
         </nav>
+
+        {/* Mobile Navigation */}
+        <nav className={`nav-items ${mobileMenuOpen ? 'active' : ''}`}>
+          {NAV_ITEMS.map((item) => {
+            const active = router.pathname === item.href
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  color: active ? 'var(--color-success)' : 'white',
+                  textDecoration: 'none',
+                  fontWeight: 700,
+                  fontSize: '1.5rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  padding: '1rem',
+                  transition: 'all 200ms'
+                }}
+              >
+                <span style={{ fontSize: '2rem' }}>{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+            )
+          })}
+        </nav>
       </header>
 
       {/* Main Content */}
-      <main style={{ flex: 1, background: 'white' }}>
+      <main id="main-content" style={{ flex: 1, background: 'var(--color-bg)' }}>
         {children}
       </main>
 
       {/* Footer */}
       <footer
         style={{
-          borderTop: '2px solid black',
-          background: 'black',
-          color: 'white',
+          borderTop: '2px solid var(--color-border)',
+          background: 'var(--black)',
+          color: 'var(--white)',
           padding: '2rem 1.5rem',
           textAlign: 'center'
         }}

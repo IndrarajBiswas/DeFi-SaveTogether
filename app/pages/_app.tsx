@@ -8,6 +8,8 @@ import { injected } from 'wagmi/connectors'
 import { didlabChain } from '../lib/chains'
 
 import Layout from '../components/Layout'
+import { ThemeProvider } from '../components/DarkModeToggle'
+import { ToastProvider } from '../components/Toast'
 import '../styles/globals.css'
 
 const rpcUrl = process.env.NEXT_PUBLIC_DIDLAB_RPC_URL || 'https://eth.didlab.org'
@@ -25,12 +27,16 @@ const wagmiConfig = createConfig({
 export default function MicrofinanceApp({ Component, pageProps }: AppProps) {
   const [queryClient] = useState(() => new QueryClient())
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <ThemeProvider>
+      <ToastProvider>
+        <WagmiProvider config={wagmiConfig}>
+          <QueryClientProvider client={queryClient}>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </QueryClientProvider>
+        </WagmiProvider>
+      </ToastProvider>
+    </ThemeProvider>
   )
 }

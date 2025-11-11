@@ -1,7 +1,12 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useState, useEffect } from 'react'
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useBalance } from 'wagmi'
 import { CONTRACTS, parseLabUSDT, formatLabUSDT } from '../lib/contracts'
 import HelpDialog from '../components/HelpDialog'
+import StatCard from '../components/StatCard'
+import FormInput from '../components/FormInput'
+import ProgressBar from '../components/ProgressBar'
+import TransactionModal from '../components/TransactionModal'
+import { useToast } from '../components/Toast'
 
 export default function SavingsPage() {
   const { address, isConnected } = useAccount()
@@ -9,6 +14,9 @@ export default function SavingsPage() {
   const [withdrawAmount, setWithdrawAmount] = useState('0')
   const [error, setError] = useState<string | null>(null)
   const [showSavingsHelp, setShowSavingsHelp] = useState(false)
+  const [showTxModal, setShowTxModal] = useState(false)
+  const [txStatus, setTxStatus] = useState<'pending' | 'success' | 'error' | 'loading'>('loading')
+  const toast = useToast()
 
   // Read user's LabUSDT balance
   const { data: usdtBalance } = useBalance({
@@ -54,17 +62,30 @@ export default function SavingsPage() {
   const { isLoading: isDepositing, isSuccess: depositSuccess } = useWaitForTransactionReceipt({ hash: depositHash })
   const { isLoading: isWithdrawing, isSuccess: withdrawSuccess } = useWaitForTransactionReceipt({ hash: withdrawHash })
 
-  // Refetch data after successful transactions
-  if (approveSuccess) {
-    refetchAllowance()
-  }
-  if (depositSuccess) {
-    refetchSavingsBalance()
-    refetchStreak()
-  }
-  if (withdrawSuccess) {
-    refetchSavingsBalance()
-  }
+  // Handle transaction successes with toast notifications
+  useEffect(() => {
+    if (approveSuccess) {
+      refetchAllowance()
+      toast.success('Approval Successful', 'You can now deposit LabUSDT to your savings.')
+    }
+  }, [approveSuccess, refetchAllowance, toast])
+
+  useEffect(() => {
+    if (depositSuccess) {
+      refetchSavingsBalance()
+      refetchStreak()
+      toast.success('Deposit Successful', 'Your savings streak has been updated!')
+      setDepositAmount('100')
+    }
+  }, [depositSuccess, refetchSavingsBalance, refetchStreak, toast])
+
+  useEffect(() => {
+    if (withdrawSuccess) {
+      refetchSavingsBalance()
+      toast.warning('Withdrawal Successful', 'Your savings streak has been reset to zero.')
+      setWithdrawAmount('0')
+    }
+  }, [withdrawSuccess, refetchSavingsBalance, toast])
 
   const handleApprove = () => {
     setError(null)
@@ -142,26 +163,36 @@ export default function SavingsPage() {
         <section className="card">
           <h2>Your Savings</h2>
           <div className="stats-grid" style={{ marginTop: '1.5rem' }}>
-            <div className="stat-card">
-              <div className="stat-value">
-                {usdtBalance ? Number(usdtBalance.formatted).toFixed(2) : '0.00'}
-              </div>
-              <div className="stat-label">Wallet Balance</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">
-                {savingsBalance ? formatLabUSDT(savingsBalance as bigint) : '0.00'}
-              </div>
-              <div className="stat-label">Savings Balance</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">{streak?.toString() || '0'}</div>
-              <div className="stat-label">Current Streak</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">{consecutiveWeeks?.toString() || '0'}</div>
-              <div className="stat-label">Consecutive Weeks</div>
-            </div>
+            <StatCard
+              value={usdtBalance ? Number(usdtBalance.formatted).toFixed(2) : '0.00'}
+              label="Wallet Balance"
+              icon="💵"
+            />
+            <StatCard
+              value={savingsBalance ? formatLabUSDT(savingsBalance as bigint) : '0.00'}
+              label="Savings Balance"
+              icon="💰"
+            />
+            <StatCard
+              value={streak?.toString() || '0'}
+              label="Current Streak"
+              icon="🔥"
+            />
+            <StatCard
+              value={consecutiveWeeks?.toString() || '0'}
+              label="Consecutive Weeks"
+              icon="📅"
+            />
+          </div>
+
+          {/* Streak Progress Bar */}
+          <div style={{ marginTop: '1.5rem' }}>
+            <ProgressBar
+              value={Number(streak || 0)}
+              max={5}
+              label="Loan Eligibility Progress"
+              variant={Number(streak || 0) >= 5 ? 'success' : 'default'}
+            />
           </div>
 
           {streak && Number(streak) >= 5 ? (

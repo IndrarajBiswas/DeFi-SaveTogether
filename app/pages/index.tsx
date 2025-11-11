@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import { CONTRACTS, formatLabUSDT } from '../lib/contracts'
 import Link from 'next/link'
 import HelpDialog from '../components/HelpDialog'
+import StatCard from '../components/StatCard'
+import ProgressBar from '../components/ProgressBar'
 
 export default function Dashboard() {
   const { address, isConnected } = useAccount()
@@ -73,26 +75,30 @@ export default function Dashboard() {
           <div style={{ marginTop: '2rem', color: 'var(--gray-300)' }}>Loading wallet state…</div>
         ) : isConnected ? (
           <div className="stats-grid" style={{ marginTop: '2rem' }}>
-            <div className="stat-card">
-              <div className="stat-value">
-                {usdtBalance ? Number(usdtBalance.formatted).toFixed(2) : '0.00'}
-              </div>
-              <div className="stat-label">LabUSDT Balance</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">
-                {savingsBalance ? formatLabUSDT(savingsBalance as bigint) : '0.00'}
-              </div>
-              <div className="stat-label">Savings Balance</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">{streak?.toString() || '0'}</div>
-              <div className="stat-label">Week Streak</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">{attestationLevel?.toString() || '0'}</div>
-              <div className="stat-label">Attestation Level</div>
-            </div>
+            <StatCard
+              value={usdtBalance ? Number(usdtBalance.formatted).toFixed(2) : '0.00'}
+              label="LabUSDT Balance"
+              icon="💵"
+              loading={!hydrated}
+            />
+            <StatCard
+              value={savingsBalance ? formatLabUSDT(savingsBalance as bigint) : '0.00'}
+              label="Savings Balance"
+              icon="💰"
+              loading={!hydrated}
+            />
+            <StatCard
+              value={streak?.toString() || '0'}
+              label="Week Streak"
+              icon="🔥"
+              loading={!hydrated}
+            />
+            <StatCard
+              value={attestationLevel?.toString() || '0'}
+              label="Attestation Level"
+              icon="🎖️"
+              loading={!hydrated}
+            />
           </div>
         ) : (
           <div style={{ marginTop: '2rem' }}>

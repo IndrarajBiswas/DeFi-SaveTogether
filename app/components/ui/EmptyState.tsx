@@ -3,7 +3,7 @@ import { Button } from './Button'
 import { LucideIcon } from 'lucide-react'
 
 interface EmptyStateProps {
-  icon?: string | LucideIcon
+  icon?: ReactNode | LucideIcon
   title: string
   message: string
   action?: {
@@ -15,12 +15,24 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ icon, title, message, action, children }: EmptyStateProps) {
-  const IconComponent = typeof icon === 'function' ? icon : null
+  // Render icon based on type
+  const renderIcon = () => {
+    if (!icon) return null
+
+    // Check if icon is a component (LucideIcon)
+    if (typeof icon === 'function') {
+      const IconComponent = icon as LucideIcon
+      return <IconComponent className="w-16 h-16 text-text-muted" />
+    }
+
+    // Otherwise render as ReactNode (string emoji, JSX, etc.)
+    return <>{icon}</>
+  }
 
   return (
     <div className="empty-state">
       <div className="empty-state-icon">
-        {IconComponent ? <IconComponent className="w-16 h-16 text-text-muted" /> : icon}
+        {renderIcon()}
       </div>
       <h3 className="empty-state-title">{title}</h3>
       <p className="empty-state-message">{message}</p>

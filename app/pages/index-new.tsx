@@ -274,7 +274,7 @@ export default function Dashboard() {
               <p className="text-sm text-text-muted">Apply for microfinance</p>
             </Card>
           </Link>
-          {address && attestationLevel && Number(attestationLevel) >= 2 && (
+          {address && attestationLevel && Number(attestationLevel) >= 2 ? (
             <Link href="/admin" className="block group">
               <Card interactive className="text-center p-6">
                 <Shield className="w-12 h-12 text-accent mx-auto mb-3 group-hover:scale-110 transition-transform" />
@@ -282,7 +282,7 @@ export default function Dashboard() {
                 <p className="text-sm text-text-muted">Manage platform settings</p>
               </Card>
             </Link>
-          )}
+          ) : null}
         </div>
       </SectionCard>
 

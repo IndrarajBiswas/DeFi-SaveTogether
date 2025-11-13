@@ -1,9 +1,11 @@
 import { FormEvent, useState, useEffect } from 'react'
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useBalance } from 'wagmi'
 import { CONTRACTS, parseLabUSDT, formatLabUSDT } from '../lib/contracts'
-import { Container, PageHeader, SectionCard, StatCard, Button, Badge, Input, Card } from '../components/ui'
-import { Wallet, TrendingUp, Zap, Calendar, AlertCircle, CheckCircle2, Info, ArrowDownCircle, ArrowUpCircle } from 'lucide-react'
 import HelpDialog from '../components/HelpDialog'
+import StatCard from '../components/StatCard'
+import FormInput from '../components/FormInput'
+import ProgressBar from '../components/ProgressBar'
+import TransactionModal from '../components/TransactionModal'
 import { useToast } from '../components/Toast'
 
 export default function SavingsPage() {
@@ -12,6 +14,8 @@ export default function SavingsPage() {
   const [withdrawAmount, setWithdrawAmount] = useState('0')
   const [error, setError] = useState<string | null>(null)
   const [showSavingsHelp, setShowSavingsHelp] = useState(false)
+  const [showTxModal, setShowTxModal] = useState(false)
+  const [txStatus, setTxStatus] = useState<'pending' | 'success' | 'error' | 'loading'>('loading')
   const toast = useToast()
 
   // Read user's LabUSDT balance
@@ -88,7 +92,7 @@ export default function SavingsPage() {
     approve({
       ...CONTRACTS.labUSDT,
       functionName: 'approve',
-      args: [CONTRACTS.savingsPool.address, parseLabUSDT(10000)],
+      args: [CONTRACTS.savingsPool.address, parseLabUSDT(10000)], // Approve 10k
     })
   }
 
@@ -137,241 +141,233 @@ export default function SavingsPage() {
   }
 
   const needsApproval = !allowance || (allowance as bigint) < parseLabUSDT(parseFloat(depositAmount) || 0)
-  const currentStreak = Number(streak || 0)
-  const isLoanEligible = currentStreak >= 5
 
   return (
-    <Container>
-      <PageHeader
-        title="Savings"
-        subtitle="Build your savings streak to unlock loan eligibility"
-        action={
-          <Button variant="ghost" onClick={() => setShowSavingsHelp(true)} icon={Info}>
-            How It Works
-          </Button>
-        }
-      />
+    <div className="grid">
+      {/* Hero */}
+      <section className="card-hero">
+        <h1>💰 Savings Pool</h1>
+        <p>Build your savings streak to unlock loan eligibility. Deposit weekly to maintain your reputation.</p>
+        <button
+          className="help-button"
+          onClick={() => setShowSavingsHelp(true)}
+          style={{ marginTop: '1rem' }}
+        >
+          <span className="help-button-icon">?</span>
+          How Savings Work
+        </button>
+      </section>
 
       {/* User Stats */}
       {isConnected ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard
-            value={usdtBalance ? Number(usdtBalance.formatted).toFixed(2) : '0.00'}
-            label="Wallet Balance"
-            icon={Wallet}
-          />
-          <StatCard
-            value={savingsBalance ? formatLabUSDT(savingsBalance as bigint) : '0.00'}
-            label="Savings Balance"
-            icon={TrendingUp}
-          />
-          <StatCard
-            value={currentStreak.toString()}
-            label="Current Streak"
-            icon={Zap}
-          />
-          <StatCard
-            value={consecutiveWeeks?.toString() || '0'}
-            label="Consecutive Weeks"
-            icon={Calendar}
-          />
-        </div>
-      ) : (
-        <Card className="mb-8 text-center py-12">
-          <Wallet className="w-16 h-16 mx-auto mb-4 text-text-muted" />
-          <h3 className="text-xl font-semibold text-text-primary mb-2">Connect Your Wallet</h3>
-          <p className="text-text-secondary">Please connect your wallet to view your savings and make deposits</p>
-        </Card>
-      )}
-
-      {/* Streak Progress */}
-      {isConnected && (
-        <Card className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-text-primary">Loan Eligibility Progress</h3>
-            <Badge variant={isLoanEligible ? 'success' : 'default'}>
-              {currentStreak}/5 weeks
-            </Badge>
-          </div>
-
-          <div className="w-full h-4 bg-zinc-800 rounded-full overflow-hidden border border-border-subtle">
-            <div
-              className={`h-full transition-all duration-500 ${
-                isLoanEligible ? 'bg-gradient-to-r from-emerald-500 to-emerald-600' : 'bg-gradient-to-r from-accent to-accent-soft'
-              }`}
-              style={{ width: `${Math.min((currentStreak / 5) * 100, 100)}%` }}
+        <section className="card">
+          <h2>Your Savings</h2>
+          <div className="stats-grid" style={{ marginTop: '1.5rem' }}>
+            <StatCard
+              value={usdtBalance ? Number(usdtBalance.formatted).toFixed(2) : '0.00'}
+              label="Wallet Balance"
+              icon="💵"
+            />
+            <StatCard
+              value={savingsBalance ? formatLabUSDT(savingsBalance as bigint) : '0.00'}
+              label="Savings Balance"
+              icon="💰"
+            />
+            <StatCard
+              value={streak?.toString() || '0'}
+              label="Current Streak"
+              icon="🔥"
+            />
+            <StatCard
+              value={consecutiveWeeks?.toString() || '0'}
+              label="Consecutive Weeks"
+              icon="📅"
             />
           </div>
 
-          {isLoanEligible ? (
-            <div className="mt-4 flex items-start gap-3 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-emerald-400 mb-1">Loan Eligible!</p>
-                <p className="text-sm text-text-secondary">
-                  You have {currentStreak} weeks of savings streak. You can now request loans.
-                </p>
-              </div>
-            </div>
-          ) : currentStreak > 0 ? (
-            <div className="mt-4 flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-              <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-blue-400 mb-1">Keep Going!</p>
-                <p className="text-sm text-text-secondary">
-                  You need {5 - currentStreak} more weeks of consecutive savings to unlock loan eligibility.
-                </p>
-              </div>
+          {/* Streak Progress Bar */}
+          <div style={{ marginTop: '1.5rem' }}>
+            <ProgressBar
+              value={Number(streak || 0)}
+              max={5}
+              label="Loan Eligibility Progress"
+              variant={Number(streak || 0) >= 5 ? 'success' : 'default'}
+            />
+          </div>
+
+          {streak && Number(streak) >= 5 ? (
+            <div className="alert alert-success" style={{ marginTop: '1.5rem' }}>
+              ✅ <strong>Loan Eligible!</strong> You have {streak.toString()} weeks of savings streak. You can now
+              request loans.
             </div>
           ) : null}
-        </Card>
+
+          {streak && Number(streak) < 5 && Number(streak) > 0 ? (
+            <div className="alert alert-info" style={{ marginTop: '1.5rem' }}>
+              💪 Keep going! You need {5 - Number(streak)} more weeks of consecutive savings to unlock loan
+              eligibility.
+            </div>
+          ) : null}
+        </section>
+      ) : (
+        <section className="card">
+          <h2>Connect Wallet</h2>
+          <p>Please connect your wallet to view your savings and make deposits.</p>
+        </section>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Deposit Section */}
-        <SectionCard
-          title="Deposit Savings"
-          subtitle="Build your weekly streak"
-        >
-          {error && (
-            <div className="mb-4 flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-400">{error}</p>
-            </div>
-          )}
+      {/* Deposit */}
+      <section className="card">
+        <h2>Deposit Savings</h2>
+        {error && <div className="alert alert-error">{error}</div>}
 
-          {needsApproval && isConnected && (
-            <div className="mb-6 p-4 bg-card-hover rounded-lg border border-border-subtle">
-              <p className="text-sm text-text-secondary mb-3">
-                First, approve the SavingsPool contract to spend your LabUSDT
-              </p>
-              <Button
-                onClick={handleApprove}
-                loading={isApproving}
-                disabled={isApproving}
-                variant="secondary"
-                className="w-full"
-              >
-                Approve LabUSDT
-              </Button>
-            </div>
-          )}
+        {needsApproval && isConnected && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <p style={{ marginBottom: '1rem', color: 'var(--gray-700)' }}>
+              First, you need to approve the SavingsPool contract to spend your LabUSDT.
+            </p>
+            <button onClick={handleApprove} disabled={isApproving} className="button">
+              {isApproving ? (
+                <>
+                  <span className="spinner" /> Approving...
+                </>
+              ) : (
+                'Approve LabUSDT'
+              )}
+            </button>
+          </div>
+        )}
 
-          <form onSubmit={handleDeposit} className="space-y-4">
-            <Input
-              label="Amount (LabUSDT)"
+        <form className="form" onSubmit={handleDeposit}>
+          <label>
+            Amount (LabUSDT)
+            <input
               type="number"
               value={depositAmount}
               onChange={(e) => setDepositAmount(e.target.value)}
               placeholder="100"
-              min="0"
               step="0.01"
+              min="0"
             />
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={!isConnected || needsApproval || isDepositing}
-              loading={isDepositing}
-              icon={ArrowDownCircle}
-              className="w-full"
-            >
-              Deposit to Savings
-            </Button>
-          </form>
+          </label>
+          <button type="submit" disabled={!isConnected || needsApproval || isDepositing} className="button">
+            {isDepositing ? (
+              <>
+                <span className="spinner spinner-white" /> Depositing...
+              </>
+            ) : (
+              'Deposit to Savings'
+            )}
+          </button>
+        </form>
 
-          {depositHash && (
-            <a
-              href={`https://explorer.didlab.org/tx/${depositHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block mt-4 text-sm text-accent hover:text-accent-hover underline"
-            >
-              View Transaction →
-            </a>
-          )}
-        </SectionCard>
+        {depositHash && (
+          <a
+            href={`https://explorer.didlab.org/tx/${depositHash}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tx-link"
+          >
+            View Transaction →
+          </a>
+        )}
 
-        {/* Withdraw Section */}
-        <SectionCard
-          title="Withdraw Savings"
-          subtitle="Warning: Resets your streak"
-        >
-          <div className="mb-6 flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-            <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold text-amber-400 mb-1">Warning</p>
-              <p className="text-sm text-text-secondary">
-                Withdrawing will reset your savings streak to zero!
-              </p>
-            </div>
+        {depositSuccess && (
+          <div className="alert alert-success" style={{ marginTop: '1rem' }}>
+            ✅ Deposit successful! Your streak has been updated.
           </div>
+        )}
+      </section>
 
-          <form onSubmit={handleWithdraw} className="space-y-4">
-            <Input
-              label="Amount (LabUSDT)"
+      {/* Withdraw */}
+      <section className="card">
+        <h2>Withdraw Savings</h2>
+        <p style={{ marginBottom: '1rem', color: 'var(--gray-700)' }}>
+          ⚠️ <strong>Warning:</strong> Withdrawing will reset your savings streak to zero!
+        </p>
+
+        <form className="form" onSubmit={handleWithdraw}>
+          <label>
+            Amount (LabUSDT)
+            <input
               type="number"
               value={withdrawAmount}
               onChange={(e) => setWithdrawAmount(e.target.value)}
               placeholder="0"
-              min="0"
               step="0.01"
-              hint={`Available: ${savingsBalance ? formatLabUSDT(savingsBalance as bigint) : '0.00'} LabUSDT`}
+              min="0"
+              max={savingsBalance ? formatLabUSDT(savingsBalance as bigint) : '0'}
             />
-            <Button
-              type="submit"
-              variant="outline"
-              disabled={!isConnected || isWithdrawing || !savingsBalance || savingsBalance === BigInt(0)}
-              loading={isWithdrawing}
-              icon={ArrowUpCircle}
-              className="w-full"
-            >
-              Withdraw Savings
-            </Button>
-          </form>
+          </label>
+          <button
+            type="submit"
+            disabled={!isConnected || isWithdrawing || !savingsBalance || savingsBalance === BigInt(0)}
+            className="button button-outline"
+          >
+            {isWithdrawing ? (
+              <>
+                <span className="spinner" /> Withdrawing...
+              </>
+            ) : (
+              'Withdraw Savings'
+            )}
+          </button>
+        </form>
 
-          {withdrawHash && (
-            <a
-              href={`https://explorer.didlab.org/tx/${withdrawHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block mt-4 text-sm text-accent hover:text-accent-hover underline"
-            >
-              View Transaction →
-            </a>
-          )}
-        </SectionCard>
-      </div>
+        {withdrawHash && (
+          <a
+            href={`https://explorer.didlab.org/tx/${withdrawHash}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tx-link"
+          >
+            View Transaction →
+          </a>
+        )}
+
+        {withdrawSuccess && (
+          <div className="alert alert-success" style={{ marginTop: '1rem' }}>
+            ✅ Withdrawal successful!
+          </div>
+        )}
+      </section>
 
       {/* FAQ */}
-      <SectionCard title="Frequently Asked Questions" className="mt-8">
-        <div className="space-y-6">
-          {[
-            {
-              q: 'What is a savings streak?',
-              a: 'Your savings streak is the number of consecutive weeks you\'ve made deposits. It demonstrates financial discipline and is required to access loans.',
-            },
-            {
-              q: 'Why do I need 5 weeks?',
-              a: 'The 5-week minimum streak requirement shows consistent savings behavior and reduces default risk. It\'s based on proven microfinance principles.',
-            },
-            {
-              q: 'Can I deposit multiple times per week?',
-              a: 'Yes! Multiple deposits in the same week count as one week for your streak. Your total balance increases with each deposit.',
-            },
-            {
-              q: 'What happens if I miss a week?',
-              a: 'If you skip a week, your streak resets to 1 when you make your next deposit. You\'ll need to build back up to 5 consecutive weeks.',
-            },
-          ].map((faq, idx) => (
-            <div key={idx}>
-              <h3 className="text-base font-semibold text-text-primary mb-2">{faq.q}</h3>
-              <p className="text-sm text-text-secondary">{faq.a}</p>
-            </div>
-          ))}
+      <section className="card" style={{ gridColumn: '1 / -1' }}>
+        <h2>Frequently Asked Questions</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1.5rem' }}>
+          <div>
+            <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>What is a savings streak?</h3>
+            <p style={{ margin: 0, color: 'var(--gray-700)' }}>
+              Your savings streak is the number of consecutive weeks you&apos;ve made deposits. It demonstrates financial
+              discipline and is required to access loans.
+            </p>
+          </div>
+          <div>
+            <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>Why do I need 5 weeks?</h3>
+            <p style={{ margin: 0, color: 'var(--gray-700)' }}>
+              The 5-week minimum streak requirement shows consistent savings behavior and reduces default risk. It&apos;s
+              based on proven microfinance principles.
+            </p>
+          </div>
+          <div>
+            <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>Can I deposit multiple times per week?</h3>
+            <p style={{ margin: 0, color: 'var(--gray-700)' }}>
+              Yes! Multiple deposits in the same week count as one week for your streak. Your total balance increases
+              with each deposit.
+            </p>
+          </div>
+          <div>
+            <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>What happens if I miss a week?</h3>
+            <p style={{ margin: 0, color: 'var(--gray-700)' }}>
+              If you skip a week, your streak resets to 1 when you make your next deposit. You&apos;ll need to build back
+              up to 5 consecutive weeks.
+            </p>
+          </div>
         </div>
-      </SectionCard>
+      </section>
 
-      {/* Help Dialog */}
+      {/* How Savings Work Help Dialog */}
       <HelpDialog
         isOpen={showSavingsHelp}
         onClose={() => setShowSavingsHelp(false)}
@@ -403,8 +399,14 @@ export default function SavingsPage() {
             system. Only withdraw when absolutely necessary, as you&apos;ll lose your loan eligibility until you
             rebuild your streak.
           </p>
+
+          <h3>Earn Interest (Coming Soon)</h3>
+          <p>
+            In future updates, you&apos;ll earn yield on your savings balance. Your funds will work for you while
+            building your reputation, creating a win-win scenario for savers.
+          </p>
         </div>
       </HelpDialog>
-    </Container>
+    </div>
   )
 }

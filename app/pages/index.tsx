@@ -2,15 +2,32 @@ import { useAccount, useReadContract, useBalance } from 'wagmi'
 import { useEffect, useState } from 'react'
 import { CONTRACTS, formatLabUSDT } from '../lib/contracts'
 import Link from 'next/link'
-import HelpDialog from '../components/HelpDialog'
+import {
+  Wallet,
+  Users,
+  Landmark,
+  CheckCircle2,
+  TrendingUp,
+  Shield,
+  Zap,
+  BookOpen
+} from 'lucide-react'
+
+import {
+  Container,
+  HeroCard,
+  StatCard,
+  SectionCard,
+  MetricRow,
+  Button,
+  Badge,
+  Card
+} from '../components/ui'
 import AccountSetupGuide from '../components/AccountSetupGuide'
-import StatCard from '../components/StatCard'
-import ProgressBar from '../components/ProgressBar'
 
 export default function Dashboard() {
   const { address, isConnected } = useAccount()
   const [hydrated, setHydrated] = useState(false)
-  const [showQuickActionsHelp, setShowQuickActionsHelp] = useState(false)
   const [showAccountSetup, setShowAccountSetup] = useState(false)
 
   useEffect(() => {
@@ -66,280 +83,282 @@ export default function Dashboard() {
   })
 
   return (
-    <div className="grid">
-      {/* Hero Card */}
-      <section className="card-hero">
-        <h1>SaveTogether</h1>
-        <p>
-          Blockchain-powered microfinance for the unbanked. Build savings, form groups, access credit.
-        </p>
+    <Container>
+      {/* Hero Section */}
+      <HeroCard
+        title="SaveTogether"
+        subtitle="Blockchain-powered microfinance for the unbanked. Build savings, form groups, access credit with on-chain transparency."
+      >
         {!hydrated ? (
-          <div style={{ marginTop: '2rem', color: 'var(--gray-300)' }}>Loading wallet state…</div>
-        ) : isConnected ? (
-          <div className="stats-grid" style={{ marginTop: '2rem' }}>
-            <StatCard
-              value={usdtBalance ? Number(usdtBalance.formatted).toFixed(2) : '0.00'}
-              label="LabUSDT Balance"
-              icon="💵"
-              loading={!hydrated}
-            />
-            <StatCard
-              value={savingsBalance ? formatLabUSDT(savingsBalance as bigint) : '0.00'}
-              label="Savings Balance"
-              icon="💰"
-              loading={!hydrated}
-            />
-            <StatCard
-              value={streak?.toString() || '0'}
-              label="Week Streak"
-              icon="🔥"
-              loading={!hydrated}
-            />
-            <StatCard
-              value={attestationLevel?.toString() || '0'}
-              label="Attestation Level"
-              icon="🎖️"
-              loading={!hydrated}
-            />
-          </div>
-        ) : (
-          <div style={{ marginTop: '2rem' }}>
-            <p style={{ color: 'var(--gray-300)', marginBottom: '1.5rem', fontSize: '1.125rem' }}>
-              New to DeFi? Start here!
+          <div className="text-text-muted">Loading wallet state…</div>
+        ) : !isConnected ? (
+          <div className="max-w-2xl mx-auto space-y-6">
+            <p className="text-text-secondary text-lg">
+              New to DeFi? Get started in minutes.
             </p>
-            <button
-              className="button button-lg"
-              onClick={() => setShowAccountSetup(true)}
-              style={{ marginBottom: '1rem' }}
-            >
-              🔐 Account Setup Guide
-            </button>
-            <p style={{ color: 'var(--gray-400)', fontSize: '0.875rem', marginTop: '1rem' }}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                variant="primary"
+                size="lg"
+                icon={BookOpen}
+                onClick={() => setShowAccountSetup(true)}
+              >
+                Account Setup Guide
+              </Button>
+              <Button variant="outline" size="lg">
+                Demo Mode
+              </Button>
+            </div>
+            <p className="text-text-muted text-sm">
               Learn how to install MetaMask, create an account, and connect to SaveTogether
             </p>
           </div>
-        )}
-      </section>
+        ) : null}
+      </HeroCard>
 
-      {/* Platform Status */}
-      <section className="card">
-        <h2>Platform Status</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '0.875rem' }}>
-              Status:
-            </span>
-            <span className={isPaused ? 'badge' : 'badge badge-outline'}>
-              {isPaused ? '⏸️ PAUSED' : '✅ ACTIVE'}
-            </span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '0.875rem' }}>
-              Interest Rate:
-            </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
-              {rateBps ? `${Number(rateBps) / 100}%` : '2%'} per 4 weeks
-            </span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '0.875rem' }}>
-              Loan Range:
-            </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
-              {minPrincipal ? formatLabUSDT(minPrincipal as bigint) : '25'} -{' '}
-              {maxPrincipal ? formatLabUSDT(maxPrincipal as bigint) : '250'} LabUSDT
-            </span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '0.875rem' }}>
-              Network:
-            </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
-              DIDLab Trust Testnet (252501)
-            </span>
-          </div>
+      {/* User Stats (only when connected) */}
+      {isConnected && hydrated && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 my-8">
+          <StatCard
+            value={usdtBalance ? Number(usdtBalance.formatted).toFixed(2) : '0.00'}
+            label="LabUSDT Balance"
+            icon={Wallet}
+            loading={!hydrated}
+          />
+          <StatCard
+            value={savingsBalance ? formatLabUSDT(savingsBalance as bigint) : '0.00'}
+            label="Total Savings"
+            icon={TrendingUp}
+            loading={!hydrated}
+          />
+          <StatCard
+            value={streak?.toString() || '0'}
+            label="Week Streak"
+            icon={Zap}
+            loading={!hydrated}
+          />
+          <StatCard
+            value={attestationLevel?.toString() || '0'}
+            label="Attestation Level"
+            icon={Shield}
+            loading={!hydrated}
+          />
         </div>
-      </section>
+      )}
 
-      {/* Getting Started */}
-      <section className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
-          <h2 style={{ margin: 0 }}>Getting Started</h2>
-          <button
-            className="button-outline button-sm"
-            onClick={() => setShowAccountSetup(true)}
-          >
-            🔐 Account Setup
-          </button>
-        </div>
-        <ol className="list" style={{ marginTop: '1rem' }}>
-          <li>
-            <strong>Set Up Your Account:</strong> Install MetaMask, create a wallet, and connect to the DIDLab Trust Testnet
-          </li>
-          <li>
-            <strong>Get Attested:</strong> Request attestation from admin to verify your identity (Level ≥ 1
-            required)
-          </li>
-          <li>
-            <strong>Build Savings:</strong> Deposit LabUSDT weekly to build your savings streak (5 weeks minimum)
-          </li>
-          <li>
-            <strong>Join a Group:</strong> Form or join a lending group of 5-8 members and lock your stake
-          </li>
-          <li>
-            <strong>Access Credit:</strong> Request loans with group approval, repay weekly to build reputation
-          </li>
-        </ol>
-      </section>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Platform Status */}
+        <SectionCard
+          title="Platform Status"
+          subtitle="Live protocol parameters"
+        >
+          <div className="space-y-1">
+            <MetricRow
+              label="Status"
+              value={
+                <Badge variant={isPaused ? 'warning' : 'success'} dot>
+                  {isPaused ? 'PAUSED' : 'ACTIVE'}
+                </Badge>
+              }
+            />
+            <MetricRow
+              label="Interest Rate"
+              value={rateBps ? `${Number(rateBps) / 100}% per 4 weeks` : '2% per 4 weeks'}
+            />
+            <MetricRow
+              label="Loan Range"
+              value={`${minPrincipal ? formatLabUSDT(minPrincipal as bigint) : '25'} - ${
+                maxPrincipal ? formatLabUSDT(maxPrincipal as bigint) : '250'
+              } LabUSDT`}
+            />
+            <MetricRow
+              label="Network"
+              value="DIDLab Trust Testnet (252501)"
+            />
+          </div>
+        </SectionCard>
+
+        {/* Getting Started */}
+        <SectionCard
+          title="Getting Started"
+          subtitle="5 steps to access credit"
+          action={
+            <Button
+              variant="outline"
+              size="sm"
+              icon={BookOpen}
+              onClick={() => setShowAccountSetup(true)}
+            >
+              Setup Guide
+            </Button>
+          }
+        >
+          <div className="space-y-4">
+            {[
+              {
+                step: 1,
+                title: 'Set Up Your Wallet',
+                description: 'Install MetaMask and connect to DIDLab Testnet',
+                icon: <Wallet className="w-5 h-5 text-accent" />,
+              },
+              {
+                step: 2,
+                title: 'Get Attested',
+                description: 'Request identity verification (Level ≥ 1)',
+                icon: <Shield className="w-5 h-5 text-accent" />,
+              },
+              {
+                step: 3,
+                title: 'Build Savings',
+                description: 'Deposit weekly for 5 consecutive weeks',
+                icon: <TrendingUp className="w-5 h-5 text-accent" />,
+              },
+              {
+                step: 4,
+                title: 'Join a Group',
+                description: 'Form or join a lending circle (5-8 members)',
+                icon: <Users className="w-5 h-5 text-accent" />,
+              },
+              {
+                step: 5,
+                title: 'Request a Loan',
+                description: 'Access credit with group approval',
+                icon: <Landmark className="w-5 h-5 text-accent" />,
+              },
+            ].map((item) => (
+              <div
+                key={item.step}
+                className="flex items-start gap-4 p-4 rounded-lg border border-border-subtle hover:border-accent transition-colors"
+              >
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center border border-accent/30">
+                  <span className="text-sm font-bold text-accent">{item.step}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    {item.icon}
+                    <h4 className="font-semibold text-text-primary">{item.title}</h4>
+                  </div>
+                  <p className="text-sm text-text-secondary">{item.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      </div>
 
       {/* Quick Actions */}
-      <section className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h2 style={{ margin: 0 }}>Quick Actions</h2>
-          <button className="help-button" onClick={() => setShowQuickActionsHelp(true)}>
-            <span className="help-button-icon">?</span>
-            Help
-          </button>
-        </div>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '1rem',
-          }}
-        >
-          <Link href="/savings" className="button button-outline" style={{ width: '100%' }}>
-            💰 Manage Savings
+      <SectionCard
+        title="Quick Actions"
+        subtitle="Jump to key features"
+        className="mt-8"
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link href="/savings" className="block group">
+            <Card interactive className="text-center p-6">
+              <Wallet className="w-12 h-12 text-accent mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              <h3 className="font-semibold text-text-primary mb-1">Manage Savings</h3>
+              <p className="text-sm text-text-muted">Deposit & track your savings</p>
+            </Card>
           </Link>
-          <Link href="/groups" className="button button-outline" style={{ width: '100%' }}>
-            👥 My Groups
+          <Link href="/groups" className="block group">
+            <Card interactive className="text-center p-6">
+              <Users className="w-12 h-12 text-accent mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              <h3 className="font-semibold text-text-primary mb-1">My Groups</h3>
+              <p className="text-sm text-text-muted">View & manage your groups</p>
+            </Card>
           </Link>
-          <Link href="/loans" className="button button-outline" style={{ width: '100%' }}>
-            🏦 Request Loan
+          <Link href="/loans" className="block group">
+            <Card interactive className="text-center p-6">
+              <Landmark className="w-12 h-12 text-accent mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              <h3 className="font-semibold text-text-primary mb-1">Request Loan</h3>
+              <p className="text-sm text-text-muted">Apply for microfinance</p>
+            </Card>
           </Link>
           {address && attestationLevel && Number(attestationLevel) >= 2 ? (
-            <Link href="/admin" className="button button-outline" style={{ width: '100%' }}>
-              ⚙️ Admin Panel
+            <Link href="/admin" className="block group">
+              <Card interactive className="text-center p-6">
+                <Shield className="w-12 h-12 text-accent mx-auto mb-3 group-hover:scale-110 transition-transform" />
+                <h3 className="font-semibold text-text-primary mb-1">Admin Panel</h3>
+                <p className="text-sm text-text-muted">Manage platform settings</p>
+              </Card>
             </Link>
           ) : null}
         </div>
-      </section>
+      </SectionCard>
 
-      {/* Account Setup Guide */}
-      <AccountSetupGuide
-        isOpen={showAccountSetup}
-        onClose={() => setShowAccountSetup(false)}
-      />
-
-      {/* Quick Actions Help Dialog */}
-      <HelpDialog
-        isOpen={showQuickActionsHelp}
-        onClose={() => setShowQuickActionsHelp(false)}
-        title="Quick Actions Guide"
-        icon="🚀"
+      {/* Why SaveTogether */}
+      <SectionCard
+        title="Why SaveTogether?"
+        subtitle="Built for financial inclusion"
+        className="mt-8"
       >
-        <div>
-          <h3>💰 Manage Savings</h3>
-          <p>
-            Visit the Savings page to deposit funds weekly, track your savings streak, and build your
-            financial reputation. A 5-week consecutive streak unlocks loan eligibility.
-          </p>
-
-          <h3>👥 My Groups</h3>
-          <p>
-            Create or join lending groups of 5-8 members. Groups provide peer accountability and are
-            required to access loans. Each member locks stake to share default risk.
-          </p>
-
-          <h3>🏦 Request Loan</h3>
-          <p>
-            Once you have a 5-week savings streak and are part of an active group, you can request
-            microfinance loans. Your group must approve the loan, and you repay weekly with 2% interest.
-          </p>
-
-          <h3>⚙️ Admin Panel</h3>
-          <p>
-            Available only to users with attestation level 2 or higher. Manage platform governance,
-            issue attestations, and configure system parameters.
-          </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[
+            {
+              icon: <TrendingUp className="w-6 h-6 text-emerald-400" />,
+              title: 'Financial Inclusion',
+              description: 'Access credit without traditional credit scores. Build reputation through savings behavior and community trust.',
+            },
+            {
+              icon: <Zap className="w-6 h-6 text-amber-400" />,
+              title: 'Fair Interest Rates',
+              description: '2% per 4-week period vs 30-50% charged by traditional microfinance. 95% cost reduction through DeFi.',
+            },
+            {
+              icon: <Users className="w-6 h-6 text-blue-400" />,
+              title: 'Community Trust',
+              description: 'Group-based lending with peer accountability. Your community vouches for you and shares responsibility.',
+            },
+            {
+              icon: <CheckCircle2 className="w-6 h-6 text-accent" />,
+              title: 'Fully Transparent',
+              description: 'All transactions on-chain. Smart contracts enforce rules. No hidden fees, no gatekeepers, just code.',
+            },
+          ].map((feature, index) => (
+            <div key={index} className="flex gap-4">
+              <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-card-hover flex items-center justify-center border border-border-subtle">
+                {feature.icon}
+              </div>
+              <div>
+                <h3 className="font-semibold text-text-primary mb-1">{feature.title}</h3>
+                <p className="text-sm text-text-secondary">{feature.description}</p>
+              </div>
+            </div>
+          ))}
         </div>
-      </HelpDialog>
-
-      {/* Key Features */}
-      <section className="card">
-        <h2>Why SaveTogether?</h2>
-        <div style={{ display: 'grid', gap: '1.5rem', marginTop: '1.5rem' }}>
-          <div>
-            <h3 style={{ fontSize: '1.125rem', marginBottom: '0.5rem' }}>🌍 Financial Inclusion</h3>
-            <p style={{ color: 'var(--gray-700)', margin: 0 }}>
-              Access credit without traditional credit scores. Build reputation through savings behavior.
-            </p>
-          </div>
-          <div>
-            <h3 style={{ fontSize: '1.125rem', marginBottom: '0.5rem' }}>💸 Fair Interest Rates</h3>
-            <p style={{ color: 'var(--gray-700)', margin: 0 }}>
-              2% per 4-week period vs 30-50% charged by traditional microfinance. 95% cost reduction.
-            </p>
-          </div>
-          <div>
-            <h3 style={{ fontSize: '1.125rem', marginBottom: '0.5rem' }}>👥 Community Trust</h3>
-            <p style={{ color: 'var(--gray-700)', margin: 0 }}>
-              Group-based lending with peer accountability. Your community vouches for you.
-            </p>
-          </div>
-          <div>
-            <h3 style={{ fontSize: '1.125rem', marginBottom: '0.5rem' }}>🔒 Fully Transparent</h3>
-            <p style={{ color: 'var(--gray-700)', margin: 0 }}>
-              All transactions on-chain. Smart contracts enforce rules. No hidden fees or gatekeepers.
-            </p>
-          </div>
-        </div>
-      </section>
+      </SectionCard>
 
       {/* Network Info */}
-      <section className="card">
-        <h2>Network Information</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
+      <Card className="mt-8">
+        <h3 className="text-lg font-semibold text-text-primary mb-4">Network Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div>
-            <strong style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>
-              Chain ID:
-            </strong>
-            <code>252501</code>
+            <span className="block text-text-muted uppercase tracking-wide text-xs mb-1">Chain ID</span>
+            <code className="text-text-primary font-mono">252501</code>
           </div>
           <div>
-            <strong style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>
-              RPC URL:
-            </strong>
-            <code>https://eth.didlab.org</code>
+            <span className="block text-text-muted uppercase tracking-wide text-xs mb-1">RPC URL</span>
+            <code className="text-text-primary font-mono text-xs">https://eth.didlab.org</code>
           </div>
           <div>
-            <strong style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>
-              Block Explorer:
-            </strong>
+            <span className="block text-text-muted uppercase tracking-wide text-xs mb-1">Explorer</span>
             <a
               href="https://explorer.didlab.org"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}
+              className="text-accent hover:text-accent-hover font-mono text-xs underline"
             >
               explorer.didlab.org
             </a>
           </div>
-          <div>
-            <strong style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>
-              Faucet:
-            </strong>
-            <a
-              href="https://faucet.didlab.org"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}
-            >
-              faucet.didlab.org
-            </a>
-          </div>
         </div>
-      </section>
-    </div>
+      </Card>
+
+      {/* Account Setup Guide Modal */}
+      <AccountSetupGuide
+        isOpen={showAccountSetup}
+        onClose={() => setShowAccountSetup(false)}
+      />
+    </Container>
   )
 }

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { CONTRACTS, formatLabUSDT } from '../lib/contracts'
 import Link from 'next/link'
 import HelpDialog from '../components/HelpDialog'
+import AccountSetupGuide from '../components/AccountSetupGuide'
 import StatCard from '../components/StatCard'
 import ProgressBar from '../components/ProgressBar'
 
@@ -10,6 +11,7 @@ export default function Dashboard() {
   const { address, isConnected } = useAccount()
   const [hydrated, setHydrated] = useState(false)
   const [showQuickActionsHelp, setShowQuickActionsHelp] = useState(false)
+  const [showAccountSetup, setShowAccountSetup] = useState(false)
 
   useEffect(() => {
     setHydrated(true)
@@ -102,8 +104,18 @@ export default function Dashboard() {
           </div>
         ) : (
           <div style={{ marginTop: '2rem' }}>
-            <p style={{ color: 'var(--gray-300)', marginBottom: '1rem' }}>
-              Connect your wallet to get started
+            <p style={{ color: 'var(--gray-300)', marginBottom: '1.5rem', fontSize: '1.125rem' }}>
+              New to DeFi? Start here!
+            </p>
+            <button
+              className="button button-lg"
+              onClick={() => setShowAccountSetup(true)}
+              style={{ marginBottom: '1rem' }}
+            >
+              🔐 Account Setup Guide
+            </button>
+            <p style={{ color: 'var(--gray-400)', fontSize: '0.875rem', marginTop: '1rem' }}>
+              Learn how to install MetaMask, create an account, and connect to SaveTogether
             </p>
           </div>
         )}
@@ -151,8 +163,19 @@ export default function Dashboard() {
 
       {/* Getting Started */}
       <section className="card">
-        <h2>Getting Started</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+          <h2 style={{ margin: 0 }}>Getting Started</h2>
+          <button
+            className="button-outline button-sm"
+            onClick={() => setShowAccountSetup(true)}
+          >
+            🔐 Account Setup
+          </button>
+        </div>
         <ol className="list" style={{ marginTop: '1rem' }}>
+          <li>
+            <strong>Set Up Your Account:</strong> Install MetaMask, create a wallet, and connect to the DIDLab Trust Testnet
+          </li>
           <li>
             <strong>Get Attested:</strong> Request attestation from admin to verify your identity (Level ≥ 1
             required)
@@ -201,6 +224,12 @@ export default function Dashboard() {
           ) : null}
         </div>
       </section>
+
+      {/* Account Setup Guide */}
+      <AccountSetupGuide
+        isOpen={showAccountSetup}
+        onClose={() => setShowAccountSetup(false)}
+      />
 
       {/* Quick Actions Help Dialog */}
       <HelpDialog

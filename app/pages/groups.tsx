@@ -1,9 +1,7 @@
 import { FormEvent, useState } from 'react'
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { CONTRACTS, parseLabUSDT } from '../lib/contracts'
+import { CONTRACTS, formatLabUSDT, parseLabUSDT } from '../lib/contracts'
 import { isValidEthAddress } from '../lib/validation'
-import { Container, PageHeader, SectionCard, StatCard, Button, Input, EmptyState } from '../components/ui'
-import { Users, Plus, Shield, AlertCircle } from 'lucide-react'
 import HelpDialog from '../components/HelpDialog'
 
 export default function GroupsPage() {
@@ -15,26 +13,33 @@ export default function GroupsPage() {
   const [error, setError] = useState<string | null>(null)
   const [showGroupsHelp, setShowGroupsHelp] = useState(false)
 
+  // Read group count
   const { data: groupCount } = useReadContract({
     ...CONTRACTS.groupVault,
     functionName: 'groupCount',
   })
 
+  // Read allowance for lockStake
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     ...CONTRACTS.labUSDT,
     functionName: 'allowance',
     args: address ? [address, CONTRACTS.groupVault.address] : undefined,
   })
 
+  // Write functions
   const { writeContract: approve, data: approveHash } = useWriteContract()
   const { writeContract: createGroup, data: createGroupHash } = useWriteContract()
   const { writeContract: lockStake, data: lockStakeHash } = useWriteContract()
 
+  // Wait for transactions
   const { isLoading: isApproving, isSuccess: approveSuccess } = useWaitForTransactionReceipt({ hash: approveHash })
   const { isLoading: isCreatingGroup, isSuccess: createGroupSuccess } = useWaitForTransactionReceipt({ hash: createGroupHash })
   const { isLoading: isLockingStake, isSuccess: lockStakeSuccess } = useWaitForTransactionReceipt({ hash: lockStakeHash })
 
-  if (approveSuccess) refetchAllowance()
+  // Refetch allowance after approval
+  if (approveSuccess) {
+    refetchAllowance()
+  }
 
   const handleChangeMember = (index: number, value: string) => {
     const newMembers = [...members]
@@ -83,7 +88,7 @@ export default function GroupsPage() {
     approve({
       ...CONTRACTS.labUSDT,
       functionName: 'approve',
-      args: [CONTRACTS.groupVault.address, parseLabUSDT(10000)],
+      args: [CONTRACTS.groupVault.address, parseLabUSDT(10000)], // Approve 10k
     })
   }
 
@@ -107,113 +112,119 @@ export default function GroupsPage() {
   const needsApproval = !allowance || (allowance as bigint) < parseLabUSDT(parseFloat(stakeAmount) || 0)
 
   return (
-    <Container>
-      <PageHeader
-        title="Groups"
-        subtitle="Form lending circles of 5-8 members for peer accountability"
-        action={
-          <Button variant="ghost" onClick={() => setShowGroupsHelp(true)}>
-            How Groups Work
-          </Button>
-        }
-      />
+    <div className="grid">
+      <section className="card-hero">
+        <h1>👥 Group Management</h1>
+        <p>Form lending groups of 5-8 members. Lock stake and approve loans for your peers.</p>
+        <button
+          className="help-button"
+          onClick={() => setShowGroupsHelp(true)}
+          style={{ marginTop: '1rem' }}
+        >
+          <span className="help-button-icon">?</span>
+          How Groups Work
+        </button>
+      </section>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <StatCard
-          value={groupCount?.toString() || '0'}
-          label="Total Groups"
-          icon={Users}
-        />
-      </div>
+      <section className="card">
+        <h2>Platform Groups</h2>
+        <div className="stat-card">
+          <div className="stat-value">{groupCount?.toString() || '0'}</div>
+          <div className="stat-label">Total Groups</div>
+        </div>
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <SectionCard title="Create New Group" subtitle="Form a lending circle">
-          {error && (
-            <div className="mb-4 flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-400">{error}</p>
-            </div>
-          )}
+      <section className="card">
+        <h2>Create New Group</h2>
+        {error && <div className="alert alert-error">{error}</div>}
 
-          <form onSubmit={handleCreateGroup} className="space-y-4">
-            {members.map((member, index) => (
-              <Input
-                key={index}
-                label={`Member ${index + 1} Address`}
+        <form className="form" onSubmit={handleCreateGroup}>
+          {members.map((member, index) => (
+            <label key={index}>
+              Member {index + 1} Address
+              <input
                 placeholder="0x..."
                 value={member}
                 onChange={(e) => handleChangeMember(index, e.target.value)}
               />
-            ))}
-            <Input
-              label="Minimum Approvals Required"
+            </label>
+          ))}
+          <label>
+            Minimum Approvals Required
+            <input
               type="number"
               min={3}
               max={8}
               value={minApprovals}
               onChange={(e) => setMinApprovals(Number(e.target.value))}
             />
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={!isConnected || isCreatingGroup}
-              loading={isCreatingGroup}
-              icon={Plus}
-              className="w-full"
-            >
-              Create Group
-            </Button>
-          </form>
+          </label>
+          <button type="submit" disabled={!isConnected || isCreatingGroup} className="button">
+            {isCreatingGroup ? (
+              <>
+                <span className="spinner spinner-white" /> Creating Group...
+              </>
+            ) : (
+              'Create Group'
+            )}
+          </button>
+        </form>
 
-          {createGroupHash && (
-            <a
-              href={`https://explorer.didlab.org/tx/${createGroupHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block mt-4 text-sm text-accent hover:text-accent-hover underline"
-            >
-              View Transaction →
-            </a>
-          )}
+        {createGroupHash && (
+          <a
+            href={`https://explorer.didlab.org/tx/${createGroupHash}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tx-link"
+          >
+            View Transaction →
+          </a>
+        )}
 
-          {createGroupSuccess && (
-            <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
-              <p className="text-sm text-emerald-400">
-                ✅ Group created successfully! Group ID: {groupCount ? (Number(groupCount) - 1).toString() : '0'}
-              </p>
-            </div>
-          )}
-        </SectionCard>
+        {createGroupSuccess && (
+          <div className="alert alert-success" style={{ marginTop: '1rem' }}>
+            ✅ Group created successfully! Group ID: {groupCount ? (Number(groupCount) - 1).toString() : '0'}
+          </div>
+        )}
+      </section>
 
-        <SectionCard title="Lock Group Stake" subtitle="Lock 5% of max exposure">
-          {needsApproval && isConnected && (
-            <div className="mb-6 p-4 bg-card-hover rounded-lg border border-border-subtle">
-              <p className="text-sm text-text-secondary mb-3">
-                First, approve the GroupVault contract to spend your LabUSDT
-              </p>
-              <Button
-                onClick={handleApprove}
-                loading={isApproving}
-                disabled={isApproving}
-                variant="secondary"
-                className="w-full"
-              >
-                Approve LabUSDT
-              </Button>
-            </div>
-          )}
+      <section className="card">
+        <h2>Lock Group Stake</h2>
+        <p style={{ marginBottom: '1rem', color: 'var(--gray-700)' }}>
+          Each member must lock 5% of max group exposure as stake.
+        </p>
 
-          <form onSubmit={handleLockStake} className="space-y-4">
-            <Input
-              label="Group ID"
+        {needsApproval && isConnected && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <p style={{ marginBottom: '1rem', color: 'var(--gray-700)' }}>
+              First, you need to approve the GroupVault contract to spend your LabUSDT.
+            </p>
+            <button onClick={handleApprove} disabled={isApproving} className="button">
+              {isApproving ? (
+                <>
+                  <span className="spinner" /> Approving...
+                </>
+              ) : (
+                'Approve LabUSDT'
+              )}
+            </button>
+          </div>
+        )}
+
+        <form className="form" onSubmit={handleLockStake}>
+          <label>
+            Group ID
+            <input
               type="number"
               value={groupId}
               onChange={(e) => setGroupId(e.target.value)}
               placeholder="0"
               min="0"
             />
-            <Input
-              label="Stake Amount (LabUSDT)"
+          </label>
+          <label>
+            Stake Amount (LabUSDT)
+            <input
               type="number"
               value={stakeAmount}
               onChange={(e) => setStakeAmount(e.target.value)}
@@ -221,37 +232,37 @@ export default function GroupsPage() {
               step="0.01"
               min="0"
             />
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={!isConnected || needsApproval || isLockingStake}
-              loading={isLockingStake}
-              icon={Shield}
-              className="w-full"
-            >
-              Lock Stake
-            </Button>
-          </form>
+          </label>
+          <button type="submit" disabled={!isConnected || needsApproval || isLockingStake} className="button">
+            {isLockingStake ? (
+              <>
+                <span className="spinner spinner-white" /> Locking Stake...
+              </>
+            ) : (
+              'Lock Stake'
+            )}
+          </button>
+        </form>
 
-          {lockStakeHash && (
-            <a
-              href={`https://explorer.didlab.org/tx/${lockStakeHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block mt-4 text-sm text-accent hover:text-accent-hover underline"
-            >
-              View Transaction →
-            </a>
-          )}
+        {lockStakeHash && (
+          <a
+            href={`https://explorer.didlab.org/tx/${lockStakeHash}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tx-link"
+          >
+            View Transaction →
+          </a>
+        )}
 
-          {lockStakeSuccess && (
-            <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
-              <p className="text-sm text-emerald-400">✅ Stake locked successfully!</p>
-            </div>
-          )}
-        </SectionCard>
-      </div>
+        {lockStakeSuccess && (
+          <div className="alert alert-success" style={{ marginTop: '1rem' }}>
+            ✅ Stake locked successfully!
+          </div>
+        )}
+      </section>
 
+      {/* How Groups Work Help Dialog */}
       <HelpDialog
         isOpen={showGroupsHelp}
         onClose={() => setShowGroupsHelp(false)}
@@ -262,20 +273,39 @@ export default function GroupsPage() {
           <h3>5-8 Members</h3>
           <p>
             Groups must have between 5 and 8 members. This size range balances accountability with
-            manageable coordination.
+            manageable coordination. Smaller groups ensure everyone knows each other, while having enough
+            members spreads risk.
           </p>
 
           <h3>Majority Approval</h3>
           <p>
-            Typically 3-of-5 or 5-of-8 approval is needed for loan approvals, ensuring peer accountability.
+            Typically 3-of-5 or 5-of-8 approval is needed for group decisions, especially loan approvals.
+            This ensures that loans are vetted by multiple trusted members, reducing default risk through
+            peer accountability.
           </p>
 
           <h3>Stake Required</h3>
           <p>
-            Each member locks 5% of max group exposure as stake, creating skin in the game.
+            Each member locks 5% of max group exposure as stake. This creates skin in the game and aligns
+            incentives. If a group member defaults, the stake can be used to cover losses, protecting the
+            broader platform.
+          </p>
+
+          <h3>Peer Accountability</h3>
+          <p>
+            The group approves loans and shares default risk. Members are incentivized to only approve
+            loans for trustworthy peers they know will repay. This peer-based system replaces traditional
+            credit scores.
+          </p>
+
+          <h3>One Loan at a Time</h3>
+          <p>
+            Groups can only have one active loan at a time. This simplifies risk management and ensures
+            members focus on supporting the current borrower. Once a loan is repaid, the next member can
+            request a loan.
           </p>
         </div>
       </HelpDialog>
-    </Container>
+    </div>
   )
 }

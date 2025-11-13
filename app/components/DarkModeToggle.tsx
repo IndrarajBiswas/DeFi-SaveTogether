@@ -10,19 +10,18 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light')
+  const [theme, setTheme] = useState<Theme>('dark') // Default to dark mode
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    // Check localStorage and system preference
+    // Check localStorage (default to dark if no preference saved)
     const savedTheme = localStorage.getItem('theme') as Theme | null
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
 
     if (savedTheme) {
       setTheme(savedTheme)
-    } else if (prefersDark) {
-      setTheme('dark')
+    } else {
+      setTheme('dark') // Force dark mode by default
     }
   }, [])
 
@@ -32,8 +31,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement
     if (theme === 'dark') {
       root.setAttribute('data-theme', 'dark')
+      root.classList.add('dark') // Add Tailwind dark class
     } else {
       root.removeAttribute('data-theme')
+      root.classList.remove('dark') // Remove Tailwind dark class
     }
     localStorage.setItem('theme', theme)
   }, [theme, mounted])

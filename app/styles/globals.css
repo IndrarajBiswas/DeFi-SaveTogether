@@ -110,10 +110,16 @@
   --color-border: #404040;
   --color-card: #171717;
 
-  /* Adjustments for readability */
-  --gray-100: #262626;
-  --gray-200: #404040;
-  --gray-300: #525252;
+  /* Adjustments for readability - Light colors for dark mode */
+  --gray-100: #f5f5f5;
+  --gray-200: #e5e5e5;
+  --gray-300: #d4d4d4;
+  --gray-400: #a3a3a3;
+  --gray-500: #737373;
+  --gray-600: #525252;
+  --gray-700: #d4d4d4;  /* Light gray for text in dark mode */
+  --gray-800: #262626;
+  --gray-900: #171717;
 
   /* Adjust gradients for dark mode */
   --gradient-primary: linear-gradient(135deg, #404040 0%, #171717 100%);
@@ -223,6 +229,55 @@
 
 [data-theme="dark"] .help-dialog-content strong {
   color: var(--white);
+}
+
+/* Additional Dark Mode Text and Element Fixes */
+[data-theme="dark"] .tx-details {
+  background: var(--gray-900);
+  border-color: var(--gray-600);
+}
+
+[data-theme="dark"] .notice {
+  background: var(--gray-800);
+  border-left-color: var(--white);
+  color: var(--gray-300);
+}
+
+[data-theme="dark"] .table {
+  background: var(--gray-900);
+}
+
+[data-theme="dark"] .table th {
+  background: var(--gray-800);
+  color: var(--white);
+}
+
+[data-theme="dark"] .table tbody tr:hover {
+  background: var(--gray-800);
+}
+
+[data-theme="dark"] .table td {
+  border-color: var(--gray-700);
+  color: var(--gray-200);
+}
+
+[data-theme="dark"] .tag {
+  background: var(--gray-800);
+  color: var(--gray-200);
+}
+
+[data-theme="dark"] .alert {
+  border-color: var(--gray-600);
+}
+
+[data-theme="dark"] .progress-bar-wrapper {
+  background: var(--gray-800);
+  border-color: var(--gray-600);
+}
+
+[data-theme="dark"] .skeleton {
+  background: linear-gradient(90deg, var(--gray-800) 25%, var(--gray-700) 50%, var(--gray-800) 75%);
+  background-size: 200% 100%;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

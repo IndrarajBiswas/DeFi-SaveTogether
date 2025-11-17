@@ -305,7 +305,7 @@ export default function LoansPage() {
 
             {needsApproval && isConnected && repayAmount && parseFloat(repayAmount) > 0 && (
               <div style={{ marginBottom: '1.5rem' }}>
-                <p style={{ marginBottom: '1rem', color: 'var(--gray-700)' }}>
+                <p style={{ marginBottom: '1rem' }}>
                   First, you need to approve the CreditLine contract to spend your LabUSDT for repayment.
                 </p>
                 <button onClick={handleApprove} disabled={isApproving} className="button">

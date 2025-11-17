@@ -271,25 +271,25 @@ export default function Dashboard() {
         <div style={{ display: 'grid', gap: '1.5rem', marginTop: '1.5rem' }}>
           <div>
             <h3 style={{ fontSize: '1.125rem', marginBottom: '0.5rem' }}>🌍 Financial Inclusion</h3>
-            <p style={{ color: 'var(--gray-700)', margin: 0 }}>
+            <p style={{ margin: 0 }}>
               Access credit without traditional credit scores. Build reputation through savings behavior.
             </p>
           </div>
           <div>
             <h3 style={{ fontSize: '1.125rem', marginBottom: '0.5rem' }}>💸 Fair Interest Rates</h3>
-            <p style={{ color: 'var(--gray-700)', margin: 0 }}>
+            <p style={{ margin: 0 }}>
               2% per 4-week period vs 30-50% charged by traditional microfinance. 95% cost reduction.
             </p>
           </div>
           <div>
             <h3 style={{ fontSize: '1.125rem', marginBottom: '0.5rem' }}>👥 Community Trust</h3>
-            <p style={{ color: 'var(--gray-700)', margin: 0 }}>
+            <p style={{ margin: 0 }}>
               Group-based lending with peer accountability. Your community vouches for you.
             </p>
           </div>
           <div>
             <h3 style={{ fontSize: '1.125rem', marginBottom: '0.5rem' }}>🔒 Fully Transparent</h3>
-            <p style={{ color: 'var(--gray-700)', margin: 0 }}>
+            <p style={{ margin: 0 }}>
               All transactions on-chain. Smart contracts enforce rules. No hidden fees or gatekeepers.
             </p>
           </div>

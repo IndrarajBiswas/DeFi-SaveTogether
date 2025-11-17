@@ -223,7 +223,7 @@ export default function SavingsPage() {
 
         {needsApproval && isConnected && (
           <div style={{ marginBottom: '1.5rem' }}>
-            <p style={{ marginBottom: '1rem', color: 'var(--gray-700)' }}>
+            <p style={{ marginBottom: '1rem' }}>
               First, you need to approve the SavingsPool contract to spend your LabUSDT.
             </p>
             <button onClick={handleApprove} disabled={isApproving} className="button">
@@ -282,7 +282,7 @@ export default function SavingsPage() {
       {/* Withdraw */}
       <section className="card">
         <h2>Withdraw Savings</h2>
-        <p style={{ marginBottom: '1rem', color: 'var(--gray-700)' }}>
+        <p style={{ marginBottom: '1rem' }}>
           ⚠️ <strong>Warning:</strong> Withdrawing will reset your savings streak to zero!
         </p>
 
@@ -338,28 +338,28 @@ export default function SavingsPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1.5rem' }}>
           <div>
             <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>What is a savings streak?</h3>
-            <p style={{ margin: 0, color: 'var(--gray-700)' }}>
+            <p style={{ margin: 0 }}>
               Your savings streak is the number of consecutive weeks you&apos;ve made deposits. It demonstrates financial
               discipline and is required to access loans.
             </p>
           </div>
           <div>
             <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>Why do I need 5 weeks?</h3>
-            <p style={{ margin: 0, color: 'var(--gray-700)' }}>
+            <p style={{ margin: 0 }}>
               The 5-week minimum streak requirement shows consistent savings behavior and reduces default risk. It&apos;s
               based on proven microfinance principles.
             </p>
           </div>
           <div>
             <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>Can I deposit multiple times per week?</h3>
-            <p style={{ margin: 0, color: 'var(--gray-700)' }}>
+            <p style={{ margin: 0 }}>
               Yes! Multiple deposits in the same week count as one week for your streak. Your total balance increases
               with each deposit.
             </p>
           </div>
           <div>
             <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>What happens if I miss a week?</h3>
-            <p style={{ margin: 0, color: 'var(--gray-700)' }}>
+            <p style={{ margin: 0 }}>
               If you skip a week, your streak resets to 1 when you make your next deposit. You&apos;ll need to build back
               up to 5 consecutive weeks.
             </p>

@@ -53,23 +53,23 @@ export default function AnalyticsPage() {
         <h2>Loan Metrics</h2>
         <div style={{ marginTop: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ color: 'var(--gray-700)' }}>Total Loans Opened</span>
+            <span style={{ color: 'inherit' }}>Total Loans Opened</span>
             <strong>{loanCount?.toString() || '0'}</strong>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ color: 'var(--gray-700)' }}>Active Loans</span>
+            <span style={{ color: 'inherit' }}>Active Loans</span>
             <strong className="tag">Requires Subgraph</strong>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ color: 'var(--gray-700)' }}>Total Disbursed</span>
+            <span style={{ color: 'inherit' }}>Total Disbursed</span>
             <strong className="tag">Requires Subgraph</strong>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ color: 'var(--gray-700)' }}>Total Repaid</span>
+            <span style={{ color: 'inherit' }}>Total Repaid</span>
             <strong className="tag">Requires Subgraph</strong>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ color: 'var(--gray-700)' }}>Default Rate</span>
+            <span style={{ color: 'inherit' }}>Default Rate</span>
             <strong className="tag">Requires Subgraph</strong>
           </div>
         </div>
@@ -80,19 +80,19 @@ export default function AnalyticsPage() {
         <h2>Group Metrics</h2>
         <div style={{ marginTop: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ color: 'var(--gray-700)' }}>Total Groups</span>
+            <span style={{ color: 'inherit' }}>Total Groups</span>
             <strong>{groupCount?.toString() || '0'}</strong>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ color: 'var(--gray-700)' }}>Active Groups</span>
+            <span style={{ color: 'inherit' }}>Active Groups</span>
             <strong className="tag">Requires Subgraph</strong>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ color: 'var(--gray-700)' }}>Avg Group Size</span>
+            <span style={{ color: 'inherit' }}>Avg Group Size</span>
             <strong className="tag">Requires Subgraph</strong>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ color: 'var(--gray-700)' }}>Total Stake Locked</span>
+            <span style={{ color: 'inherit' }}>Total Stake Locked</span>
             <strong className="tag">Requires Subgraph</strong>
           </div>
         </div>
@@ -130,15 +130,15 @@ export default function AnalyticsPage() {
         <h2>Badge & Engagement</h2>
         <div style={{ marginTop: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ color: 'var(--gray-700)' }}>Total Badges Awarded</span>
+            <span style={{ color: 'inherit' }}>Total Badges Awarded</span>
             <strong className="tag">Requires Subgraph</strong>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ color: 'var(--gray-700)' }}>Most Common Badge</span>
+            <span style={{ color: 'inherit' }}>Most Common Badge</span>
             <strong className="tag">Requires Subgraph</strong>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ color: 'var(--gray-700)' }}>Users with 5+ Badges</span>
+            <span style={{ color: 'inherit' }}>Users with 5+ Badges</span>
             <strong className="tag">Requires Subgraph</strong>
           </div>
         </div>

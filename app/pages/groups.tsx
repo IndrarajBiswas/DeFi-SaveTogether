@@ -190,13 +190,13 @@ export default function GroupsPage() {
 
       <section className="card">
         <h2>Lock Group Stake</h2>
-        <p style={{ marginBottom: '1rem', color: 'var(--gray-700)' }}>
+        <p style={{ marginBottom: '1rem' }}>
           Each member must lock 5% of max group exposure as stake.
         </p>
 
         {needsApproval && isConnected && (
           <div style={{ marginBottom: '1.5rem' }}>
-            <p style={{ marginBottom: '1rem', color: 'var(--gray-700)' }}>
+            <p style={{ marginBottom: '1rem' }}>
               First, you need to approve the GroupVault contract to spend your LabUSDT.
             </p>
             <button onClick={handleApprove} disabled={isApproving} className="button">

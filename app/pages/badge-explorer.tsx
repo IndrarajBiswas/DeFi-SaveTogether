@@ -236,7 +236,7 @@ export default function BadgeExplorerPage() {
                 <div className="stat-value" style={{ color: 'var(--black)' }}>
                   {totalCount - earnedCount}
                 </div>
-                <div className="stat-label" style={{ color: 'var(--gray-700)' }}>
+                <div className="stat-label" style={{ color: 'inherit' }}>
                   Remaining
                 </div>
               </div>
@@ -334,7 +334,7 @@ export default function BadgeExplorerPage() {
                           textAlign: 'center',
                           fontSize: 'var(--text-sm)',
                           fontWeight: 600,
-                          color: 'var(--gray-700)',
+                          color: 'inherit',
                         }}
                       >
                         🔒 Not Earned

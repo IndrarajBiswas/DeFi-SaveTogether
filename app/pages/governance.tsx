@@ -226,7 +226,7 @@ export default function GovernancePage() {
                       style={{
                         marginTop: 'var(--space-4)',
                         marginBottom: 'var(--space-6)',
-                        color: 'var(--gray-700)',
+                        color: 'inherit',
                       }}
                     >
                       {proposal.description}

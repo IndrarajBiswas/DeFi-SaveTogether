@@ -31,6 +31,9 @@ Unlock transparent, savings-first credit for small groups through shared incenti
 - **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Deploy to DIDLab testnet
 - **[Architecture](docs/architecture.md)** - System design overview
 - **[Documentation](docs/project-docs/)** - Comprehensive technical docs
+- **[Milestone Updates](docs/updates/)** - Week-by-week submissions (W6–W14)
+- **[RUNBOOK](RUNBOOK.md)** and **[CHANGELOG](CHANGELOG.md)** - Freeze & polish artifacts
+- **[Security Notes](SECURITY_NOTES.md)** and **[Threat Model](docs/security/THREAT_MODEL.md)**
 
 ## System Architecture
 
@@ -59,6 +62,22 @@ Unlock transparent, savings-first credit for small groups through shared incenti
 ```
 
 See [Architecture Documentation](docs/architecture.md) for detailed component interactions and data flows.
+
+## Milestone Timeline (W6–W14)
+
+| Week | Focus | Evidence |
+|------|-------|----------|
+| [W6 — Environment & Skeleton](docs/updates/W6_UPDATE.md) | Tooling ready, CI green, board seeded | README quickstart + CI workflow + backlog link |
+| [W7 — Vertical Slice](docs/updates/W7_UPDATE.md) | CLI deposit → contract → event readback | [Mermaid diagram](docs/diagrams/W7_VERTICAL_SLICE.md) + 2 tests |
+| [W8 — Feature 1](docs/updates/W8_UPDATE.md) | Savings streaks observable + negative test | Dashboard event feed + deposit revert coverage |
+| [W9 — Feature 2 + AuthZ](docs/updates/W9_UPDATE.md) | Group approvals with role enforcement | [SECURITY_NOTES](SECURITY_NOTES.md) + unauthorized failure test |
+| [W10 — Security Sprint](docs/updates/W10_UPDATE.md) | Threat model + 3 mitigations implemented | [THREAT_MODEL](docs/security/THREAT_MODEL.md) + guard tests |
+| [W11 — Testing & Metrics](docs/updates/W11_UPDATE.md) | ≥10 tests + latency metric | [W11_METRICS](docs/metrics/W11_METRICS.md) + harness commands |
+| [W12 — LLM/Analytics](docs/updates/W12_UPDATE.md) | Analytics dashboard + LLM finding fix | Screenshot in metrics doc; test added |
+| [W13 — Freeze & Polish](docs/updates/W13_UPDATE.md) | MVP frozen; runbook verified | [CHANGELOG](CHANGELOG.md) + [RUNBOOK](RUNBOOK.md) confirmation |
+| [W14 — Dry Run](docs/updates/W14_UPDATE.md) | Poster/pitch rehearsal | [DEMO_SCRIPT](docs/demo/DEMO_SCRIPT.md) + [poster](docs/demo/poster.md) |
+
+Project board: https://github.com/orgs/IndrarajBiswas/projects/1 (Backlog/MVP/Polish lanes).
 
 ## Repository Structure
 

@@ -1,0 +1,6 @@
+You are auditing the SaveTogether smart contracts for overflow, reentrancy, and authorization gaps.
+Focus on:
+- Streak accumulation bounds in SavingsPool.
+- Reentrancy protections on CreditLine repay and withdraw.
+- Authorization on GroupVault approveLoan (only attested members allowed).
+Suggest fixes with exact function names and preferred OpenZeppelin utilities.
